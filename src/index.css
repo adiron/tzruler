@@ -1,0 +1,29 @@
+:root {
+  font-family: Inter, Arial, sans-serif;
+  font-variant-numeric: lining-nums tabular-nums;
+  font-feature-settings: 'ss04' on, 'calt' off;
+  font-family: Inter;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-height: 100vh;
+}
+
+#root {
+  width: 100%;
+}
+
+/* @media (prefers-color-scheme: light) { */
+/*   :root { */
+/*     color: #213547; */
+/*     background-color: #ffffff; */
+/*   } */
+/*   a:hover { */
+/*     color: #747bff; */
+/*   } */
+/*   button { */
+/*     background-color: #f9f9f9; */
+/*   } */
+/* } */

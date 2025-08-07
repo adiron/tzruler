@@ -1,0 +1,12 @@
+.TopBar {
+  display: grid;
+  grid-template-columns: 1fr min-content;
+  padding: 0 24px;
+  font-size: 12px;
+}
+
+.TopBar__time {
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+}

@@ -5,3 +5,6 @@ export const ALL_TIMEZONES = Intl.supportedValuesOf('timeZone');
 
 /** Fraction of the screen's width in which the line indicating the current time will be placed **/
 export const LINE_POSITION = 0.5;
+
+/** How many divisions does an hour have? **/
+export const HOUR_DIVISIONS = 4;

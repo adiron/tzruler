@@ -3,6 +3,7 @@
   grid-template-columns: 1fr min-content;
   padding: 0 24px;
   font-size: 12px;
+  background: var(--color-bg-dark);
 }
 
 .TopBar__time {

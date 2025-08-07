@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import './App.css'
 import './TZStrip.css'
 import { TopBar } from './TopBar'
 import { TZStrip } from './TZStrip'

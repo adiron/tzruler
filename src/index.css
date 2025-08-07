@@ -3,6 +3,28 @@
   font-variant-numeric: lining-nums tabular-nums;
   font-feature-settings: 'ss04' on, 'calt' off;
   font-family: Inter;
+  line-height: 100%;
+
+  background-color: var(--color-bg);
+  color: var(--color-text);
+
+  --color-strip-divider: #e1e1e1;
+  --color-bg: #fff;
+  --color-bg-dark: #f7f7f7;
+  --color-text: #111;
+  --color-text-light: #4e4e4e;
+  --color-text-lighter: #787878;
+  --color-text-lightest: #B4B4B4;
+  --color-current: red;
+
+  --size-padding-base: 24px;
+  --size-strip-height: 104px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #000;
+  }
 }
 
 body {
@@ -14,16 +36,3 @@ body {
 #root {
   width: 100%;
 }
-
-/* @media (prefers-color-scheme: light) { */
-/*   :root { */
-/*     color: #213547; */
-/*     background-color: #ffffff; */
-/*   } */
-/*   a:hover { */
-/*     color: #747bff; */
-/*   } */
-/*   button { */
-/*     background-color: #f9f9f9; */
-/*   } */
-/* } */

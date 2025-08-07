@@ -2,6 +2,7 @@ import { useRef, useState, useLayoutEffect, useMemo, useCallback } from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { formatTzName, numberToPaddedString } from './utils';
 import { HOUR_SIZE, LINE_POSITION } from './constants';
+import { StripHour } from './StripHour';
 
 export interface TZStripParams {
   tz: string;
@@ -43,6 +44,7 @@ export function TZStrip({ tz, focusTime, onRemove }: TZStripParams) {
   const hoursInView = useMemo(() => rulerWidth / HOUR_SIZE, [rulerWidth]);
 
   // The leftmost timestamp in epoch time in THE VIEW
+  // TODO - fix this code so that it will work for LINE_POSITION != 0.5
   const leftTimeStamp = focusTime - (hoursInView / 2) * 60 * 60 * 1000;
 
   const leftTimeStampOverflow = Temporal
@@ -56,6 +58,7 @@ export function TZStrip({ tz, focusTime, onRemove }: TZStripParams) {
     .epochMilliseconds;
 
   // The rightmost timestamp in epoch time in THE VIEW
+  // TODO - fix this code so that it will work for LINE_POSITION != 0.5
   const rightTimeStamp = focusTime + (hoursInView / 2) * 60 * 60 * 1000;
   const rightTimeStampOverflow = Temporal
     .Instant
@@ -110,18 +113,12 @@ export function TZStrip({ tz, focusTime, onRemove }: TZStripParams) {
         </div>
       </div>
 
-      {hourMarks.map((m) => {
-        return <div
-          className={"TZStrip__hourMark " + (m.additional ? " TZStrip__hourMark--withAdditional" : "")}
-          key={`${m.text}-${m.additional}`}
-          style={{ left: `${epochToPixels(m.time)}px` }}
-        >
-          {m.additional && <div className="TZStrip__hourMarkAdditional">{m.additional}</div>}
-          <div
-            className="TZStrip__hourMarkText"
-          >{m.text}</div>
-        </div>
-      })}
+      {hourMarks.map((m) => <StripHour
+        epochToPixels={epochToPixels}
+        additional={m.additional}
+        time={m.time}
+        text={m.text}
+      />)}
 
     </div>
   </div>;

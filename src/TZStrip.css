@@ -9,8 +9,44 @@
 .TZStrip__info {
   background-color: white;
   box-shadow: 4px 0 7px 0 rgba(0, 0, 0, 0.06);
+  padding: 0 24px;
+  z-index: 1;
 }
 
 .TZStrip__ruler {
+  position: relative;
+}
 
+.TZStrip__currentTimeBar {
+  background: red;
+  width: 1px;
+  height: 100%;
+  position: absolute;
+}
+
+.TZStrip__currentTimeText {
+  padding-left: 4px;
+}
+
+.TZStrip__hourMark {
+  background: #000;
+  width: 1px;
+  bottom: 0;
+  position: absolute;
+  height: 50%;
+}
+
+.TZStrip__hourMark.TZStrip__hourMark--withAdditional {
+  height: calc(50% + 1em)
+}
+
+.TZStrip__hourMarkText {
+  color: #787878;
+  padding-left: 4px;
+}
+.TZStrip__hourMarkAdditional {
+  height: 1em;
+  color: #111;
+  width: 10000px;
+  padding-left: 4px;
 }

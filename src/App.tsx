@@ -22,9 +22,11 @@ function App() {
       <TopBar />
       {tzs.map(
         (e,i) => <TZStrip 
+          isDirty={!!focusTime}
           tz={e} 
           key={i} 
           onRemove={() => setTzs(tzs.filter((t) => t !== e))} 
+          focusTime={focusTime || currentTime}
         />
       )}
     </>

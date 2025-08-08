@@ -1,4 +1,4 @@
-import { useRef, useState, useLayoutEffect, useMemo, useCallback } from 'react';
+import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { formatTzName, numberToPaddedString } from './utils';
 import { HOUR_SIZE, LINE_POSITION } from './constants';
@@ -7,6 +7,8 @@ import { StripHour } from './StripHour';
 export interface TZStripParams {
   tz: string;
   onRemove: () => void;
+  onWheelX: (arg0: number) => void;
+  onDragStart: (arg0: [number,number]) => void;
   focusTime: number;
   isDirty: boolean;
 }
@@ -31,7 +33,7 @@ function generateMarks(left: number, right: number, tz: string) {
   return hours;
 }
 
-export function TZStrip({ tz, focusTime, onRemove }: TZStripParams) {
+export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart }: TZStripParams) {
   const zonedFocusTime = Temporal.Instant.fromEpochMilliseconds(focusTime).toZonedDateTimeISO(tz);
   // The TZ offset in hours as fractions (e.g. -8.0, +4.5 etc.)
   const offsetHours = zonedFocusTime.offsetNanoseconds / 1e+9 / 60 / 60;
@@ -95,12 +97,29 @@ export function TZStrip({ tz, focusTime, onRemove }: TZStripParams) {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  return <div className="TZStrip">
+  const handleWheelEvent = useCallback(
+    (e: WheelEvent<HTMLDivElement>) => {
+      if (e.deltaX !== 0) {
+        onWheelX(e.deltaX);
+      }
+    },
+    [onWheelX]
+  );
+
+  return <div 
+    className="TZStrip"
+    onWheel={e => handleWheelEvent(e)}
+  >
     <div className="TZStrip__info">
       {formatTzName(tz)}: {numberToPaddedString(zonedFocusTime.hour)}:{numberToPaddedString(zonedFocusTime.minute)} ({offsetHours})
       <button onClick={onRemove}>Remove</button>
     </div>
-    <div className="TZStrip__ruler" ref={rulerRef}>
+    <div 
+      className="TZStrip__ruler" 
+      ref={rulerRef}
+      onMouseDown={(e) => onDragStart([e.clientX, e.clientY])}
+      onTouchStart={(e) => onDragStart([e.touches[0].clientX, e.touches[0].clientY])}
+    >
       {/* The bar with all the ticks */}
       <div
         className="TZStrip__currentTimeBar"

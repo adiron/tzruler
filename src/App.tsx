@@ -2,10 +2,9 @@ import { useEffect, useState, } from 'react'
 import './TZStrip.css'
 import { TopBar } from './TopBar'
 import { TZStrip } from './TZStrip'
-import { HOUR_SIZE } from './constants'
+import { MS_PER_PIXEL } from './constants'
 import { useTime } from './TimeContext'
 
-const MS_PER_PIXEL = ((60 * 60 * 1000) / HOUR_SIZE)
 
 function App() {
   const [tzs, setTzs] = useState<string[]>(["Europe/Amsterdam", "Asia/Jerusalem", "America/New_York", "Asia/Kolkata"])
@@ -69,6 +68,8 @@ function App() {
           isDirty={!!focusTime}
           tz={e}
           key={i}
+          only={tzs.length === 1}
+          onReset={() => setFocusTime(null)}
           onRemove={() => setTzs(tzs.filter((t) => t !== e))}
           focusTime={focusTime || currentTime}
           onWheelX={handleWheelX}

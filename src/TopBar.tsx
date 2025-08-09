@@ -1,21 +1,23 @@
 import './TopBar.css'
 import { Temporal } from 'temporal-polyfill';
-import { numberToPaddedString } from './utils';
+import { instantToHHMM, numberToPaddedString } from './utils';
+import { useTime } from './TimeContext';
 
 export function TopBar() {
-    const time = Temporal.Instant.fromEpochMilliseconds(Date.now()).toZonedDateTimeISO("UTC");
-    return <div className="TopBar">
-        <div className="TopBar__logo">tzruler</div>
+  const time = useTime();
+  const utcTime = Temporal.Instant.fromEpochMilliseconds(time).toZonedDateTimeISO("UTC");
+  return <div className="TopBar">
+    <div className="TopBar__logo">tzruler</div>
 
-        <div className="TopBar__time">
-            <div>
-                {time.year}-{numberToPaddedString(time.month)}-{numberToPaddedString(time.day)}
-            </div>
-            <div>
-                {numberToPaddedString(time.hour)}:{numberToPaddedString(time.minute)}:{numberToPaddedString(time.second)}
-            </div>
-        </div>
+    <div className="TopBar__time">
+      <div>
+        {utcTime.year}-{numberToPaddedString(utcTime.month)}-{numberToPaddedString(utcTime.day)}
+      </div>
+      <div>
+        {instantToHHMM(utcTime)}
+      </div>
+    </div>
 
-    </div>;
+  </div>;
 }
 

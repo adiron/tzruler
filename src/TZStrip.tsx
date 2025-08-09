@@ -1,16 +1,19 @@
 import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
 import { Temporal } from 'temporal-polyfill';
-import { formatTzName, numberToPaddedString } from './utils';
-import { HOUR_SIZE, LINE_POSITION } from './constants';
+import { formatTzName, instantToHHMM, } from './utils';
+import { HOUR_SIZE, LINE_POSITION, MS_PER_PIXEL, OVERLAP_PROTECTION } from './constants';
 import { StripHour } from './StripHour';
+import { useTime } from './TimeContext';
 
 export interface TZStripParams {
   tz: string;
   onRemove: () => void;
   onWheelX: (arg0: number) => void;
-  onDragStart: (arg0: [number,number]) => void;
+  onDragStart: (arg0: [number, number]) => void;
+  onReset: () => void;
   focusTime: number;
   isDirty: boolean;
+  only: boolean;
 }
 
 function generateMarks(left: number, right: number, tz: string) {
@@ -24,7 +27,7 @@ function generateMarks(left: number, right: number, tz: string) {
       .toZonedDateTimeISO(tz)
     hours.push({
       time: t.toInstant().epochMilliseconds,
-      text: `${numberToPaddedString(t.hour)}:${numberToPaddedString(t.minute)}`,
+      text: instantToHHMM(t),
       additional: t.hour === 0 ? `${t.toLocaleString('en-US', { month: 'short' })} ${t.day}` : null
     })
     epoch = t.toInstant().epochMilliseconds;
@@ -33,7 +36,9 @@ function generateMarks(left: number, right: number, tz: string) {
   return hours;
 }
 
-export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart }: TZStripParams) {
+export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, isDirty, onReset }: TZStripParams) {
+  const currentTime = useTime();
+  const zonedCurrentTime = Temporal.Instant.fromEpochMilliseconds(currentTime).toZonedDateTimeISO(tz);
   const zonedFocusTime = Temporal.Instant.fromEpochMilliseconds(focusTime).toZonedDateTimeISO(tz);
   // The TZ offset in hours as fractions (e.g. -8.0, +4.5 etc.)
   const offsetHours = zonedFocusTime.offsetNanoseconds / 1e+9 / 60 / 60;
@@ -106,16 +111,16 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart }: TZSt
     [onWheelX]
   );
 
-  return <div 
+  return <div
     className="TZStrip"
     onWheel={e => handleWheelEvent(e)}
   >
     <div className="TZStrip__info">
-      {formatTzName(tz)}: {numberToPaddedString(zonedFocusTime.hour)}:{numberToPaddedString(zonedFocusTime.minute)} ({offsetHours})
-      <button onClick={onRemove}>Remove</button>
+      {formatTzName(tz)}: {instantToHHMM(zonedCurrentTime)} ({offsetHours})
+      {!only && <button onClick={onRemove}>Remove</button>}
     </div>
-    <div 
-      className="TZStrip__ruler" 
+    <div
+      className="TZStrip__ruler"
       ref={rulerRef}
       onMouseDown={(e) => onDragStart([e.clientX, e.clientY])}
       onTouchStart={(e) => onDragStart([e.touches[0].clientX, e.touches[0].clientY])}
@@ -124,11 +129,28 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart }: TZSt
       <div
         className="TZStrip__currentTimeBar"
         style={{
-          left: `${centerTimePos}px`,
+          left: `${epochToPixels(currentTime)}px`,
         }}
       >
-        <div className="TZStrip__currentTimeText">
-          {numberToPaddedString(zonedFocusTime.hour)}:{numberToPaddedString(zonedFocusTime.minute)}
+        <div className={"TZStrip__currentTimeText" + (isDirty && Math.abs(focusTime - currentTime) < (OVERLAP_PROTECTION * MS_PER_PIXEL) ? " TZStrip__currentTimeText--hidden" : "") + (isDirty ? " TZStrip__currentTimeText--dirty" : "")}>
+          {instantToHHMM(zonedCurrentTime)}
+        </div>
+      </div>
+
+      <div
+        className={"TZStrip__focusTimeBar" + (isDirty ? "" : " TZStrip__focusTimeBar--hidden")}
+        style={{
+          left: `${epochToPixels(focusTime)}px`,
+        }}
+      >
+        <div className="TZStrip__focusTimeText">
+          {instantToHHMM(zonedFocusTime)}
+          <button 
+            onClick={onReset}
+            className="TZStrip__focusTimeReset"
+          >
+          reset
+          </button>
         </div>
       </div>
 

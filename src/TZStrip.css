@@ -12,25 +12,74 @@
   background-color: var(--color-bg);
   box-shadow: 4px 0 7px 0 rgba(0, 0, 0, 0.06);
   padding: 0 var(--size-padding-base);
-  z-index: 1;
+  z-index: 10;
 }
 
 .TZStrip__ruler {
   position: relative;
 }
 
+.TZStrip__focusTimeBar,
 .TZStrip__currentTimeBar {
-  background: var(--color-current);
-  width: 1px;
   height: var(--size-strip-height);
   position: absolute;
 }
 
-.TZStrip__currentTimeText {
+.TZStrip__currentTimeBar {
+  width: 1px;
+  background: var(--color-current);
+}
+
+.TZStrip__focusTimeBar {
+  width: 2px;
+  transition: 250ms linear opacity;
+  background: var(--color-text-lighter);
+}
+
+.TZStrip__focusTimeText,
+.TZStrip__currentTimeText
+{
+  white-space: nowrap;
+  z-index: 1;
   padding-left: 4px;
   font-size: 16px;
   font-weight: 500;
   padding-top: 16px;
+  display: inline-block;
+}
+
+.TZStrip__currentTimeText {
+  color: var(--color-current);
+  transition: 100ms linear opacity 10ms;
+}
+
+.TZStrip__focusTimeText {
+  opacity: 1;
+  z-index: 2;
+}
+
+.TZStrip__focusTimeBar--hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.TZStrip__currentTimeText--dirty {
+  opacity: 0.75;
+}
+
+.TZStrip__currentTimeText--hidden {
+  opacity: 0;
+}
+
+.TZStrip__ruler:hover .TZStrip__focusTimeReset {
+  opacity: 1;
+}
+
+.TZStrip__focusTimeReset {
+  margin-left: 8px;
+  display: inline-block;
+  opacity: 0;
+  color: var(--color-text-lightest);
 }
 
 .TZStrip__hourMark {

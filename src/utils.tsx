@@ -7,3 +7,7 @@ export function formatTzName(tzName: string) {
   return tzName.replaceAll("_", " ");
 }
 
+
+export function instantToHHMM(t: {hour: number, minute: number}) {
+ return `${numberToPaddedString(t.hour)}:${numberToPaddedString(t.minute)}`
+}

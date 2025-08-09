@@ -36,3 +36,15 @@ body {
 #root {
   width: 100%;
 }
+
+button {
+  background: inherit;
+  display: block;
+  line-height: inherit;
+  color: inherit;
+  font-family: inherit;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+}

@@ -60,7 +60,7 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
 
   const leftTimeStampOverflow = Temporal
     .Instant
-    .fromEpochMilliseconds(leftTimeStamp)
+    .fromEpochMilliseconds(Math.round(leftTimeStamp))
     .toZonedDateTimeISO(tz)
     .with({ minute: 0, second: 0, millisecond: 0 })
     // This is -2 on purpose
@@ -73,7 +73,7 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
   const rightTimeStamp = Math.round(focusTime) + (hoursInView / 2) * 60 * 60 * 1000;
   const rightTimeStampOverflow = Temporal
     .Instant
-    .fromEpochMilliseconds(rightTimeStamp)
+    .fromEpochMilliseconds(Math.round(rightTimeStamp))
     .toZonedDateTimeISO(tz)
     .with({ minute: 0, second: 0, millisecond: 0 })
     .add({ hours: 1 })

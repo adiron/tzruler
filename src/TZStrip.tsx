@@ -1,7 +1,7 @@
 import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { formatTzName, formatTzOffset, instantToHHMM, } from './utils';
-import { HOUR_SIZE, LINE_POSITION, MS_PER_PIXEL, OVERLAP_PROTECTION } from './constants';
+import { HOUR_SIZE, MS_PER_PIXEL, OVERLAP_PROTECTION } from './constants';
 import { StripHour } from './StripHour';
 import { useTime } from './TimeContext';
 

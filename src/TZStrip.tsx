@@ -16,6 +16,11 @@ export interface TZStripParams {
   only: boolean;
 }
 
+function splitTZComponents(tz_: string) {
+  const [head, ...tail] = formatTzName(tz_).split("/").reverse();
+  return [tail.reverse().join(" / "), head]
+}
+
 function generateMarks(left: number, right: number, tz: string) {
   const hours = [];
 
@@ -39,20 +44,19 @@ function generateMarks(left: number, right: number, tz: string) {
 export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, isDirty, onReset }: TZStripParams) {
   const currentTime = useTime();
   const zonedCurrentTime = Temporal.Instant.fromEpochMilliseconds(currentTime).toZonedDateTimeISO(tz);
-  const zonedFocusTime = Temporal.Instant.fromEpochMilliseconds(focusTime).toZonedDateTimeISO(tz);
+  const zonedFocusTime = Temporal.Instant.fromEpochMilliseconds(Math.round(focusTime)).toZonedDateTimeISO(tz);
   // The TZ offset in hours as fractions (e.g. -8.0, +4.5 etc.)
   const offsetHours = zonedFocusTime.offsetNanoseconds / 1e+9 / 60 / 60;
 
   const rulerRef = useRef<HTMLDivElement>(null);
   const [rulerWidth, setRulerWidth] = useState(0);
 
-  const centerTimePos = useMemo(() => rulerWidth * LINE_POSITION, [rulerWidth])
   // Raw time in the view, in hours.
   const hoursInView = useMemo(() => rulerWidth / HOUR_SIZE, [rulerWidth]);
 
   // The leftmost timestamp in epoch time in THE VIEW
   // TODO - fix this code so that it will work for LINE_POSITION != 0.5
-  const leftTimeStamp = focusTime - (hoursInView / 2) * 60 * 60 * 1000;
+  const leftTimeStamp = Math.round(focusTime) - (hoursInView / 2) * 60 * 60 * 1000;
 
   const leftTimeStampOverflow = Temporal
     .Instant
@@ -66,7 +70,7 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
 
   // The rightmost timestamp in epoch time in THE VIEW
   // TODO - fix this code so that it will work for LINE_POSITION != 0.5
-  const rightTimeStamp = focusTime + (hoursInView / 2) * 60 * 60 * 1000;
+  const rightTimeStamp = Math.round(focusTime) + (hoursInView / 2) * 60 * 60 * 1000;
   const rightTimeStampOverflow = Temporal
     .Instant
     .fromEpochMilliseconds(rightTimeStamp)
@@ -102,6 +106,8 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
     return () => window.removeEventListener("resize", measure);
   }, []);
 
+  const [tzPath, tzName] = splitTZComponents(tz);
+
   const handleWheelEvent = useCallback(
     (e: WheelEvent<HTMLDivElement>) => {
       if (e.deltaX !== 0) {
@@ -116,7 +122,9 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
     onWheel={e => handleWheelEvent(e)}
   >
     <div className="TZStrip__info">
-      {formatTzName(tz)}: {instantToHHMM(zonedCurrentTime)} ({offsetHours})
+      <div className="TZStrip__tzPath">{tzPath}</div>
+      <div className="TZStrip__tzName">{tzName}</div>
+      ({offsetHours})
       {!only && <button onClick={onRemove}>Remove</button>}
     </div>
     <div

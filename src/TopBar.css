@@ -1,8 +1,4 @@
 .TopBar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
   display: grid;
   grid-template-columns: 1fr min-content;
   padding: 0 24px;

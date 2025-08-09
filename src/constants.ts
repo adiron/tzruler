@@ -11,3 +11,5 @@ export const LINE_POSITION = 0.5;
 export const HOUR_DIVISIONS = 4;
 
 export const OVERLAP_PROTECTION = HOUR_SIZE * .8;
+
+export const SNAP_BACK_DURATION = 250;

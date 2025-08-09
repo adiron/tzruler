@@ -2,8 +2,10 @@ import { useEffect, useState, } from 'react'
 import './TZStrip.css'
 import { TopBar } from './TopBar'
 import { TZStrip } from './TZStrip'
-import { MS_PER_PIXEL } from './constants'
+import { MS_PER_PIXEL, SNAP_BACK_DURATION } from './constants'
 import { useTime } from './TimeContext'
+import AddTZ from './AddTZ'
+import { easeInOutCubic } from './ease'
 
 
 function App() {
@@ -15,8 +17,32 @@ function App() {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [mousePos, setMousePos] = useState<[number, number] | null>(null);
 
+  const animateFocusTimeBack = () => {
+    if (focusTime == null) return;
+
+    const start = performance.now();
+    const from = focusTime;
+    const to = currentTime;
+
+    const step = (now: number) => {
+      const t = Math.min((now - start) / SNAP_BACK_DURATION, 1);
+      const eased = easeInOutCubic(t);
+      const newTime = from + (to - from) * eased;
+
+      setFocusTime(newTime);
+
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        setFocusTime(null); // finally clear to signal "no focus"
+      }
+    };
+
+    requestAnimationFrame(step);
+  };
+
   useEffect(() => {
-    const handleChange = (prev:number, next:number) => {
+    const handleChange = (prev: number, next: number) => {
       // Offset in pixels:
       const sub = prev - next;
       setFocusTime(
@@ -25,13 +51,13 @@ function App() {
     }
     const mouse = (e: MouseEvent) => {
       if (!isDragging || !mousePos) return;
-      const pos: [number,number] = [e.clientX, e.clientY];
+      const pos: [number, number] = [e.clientX, e.clientY];
       handleChange(mousePos[0], pos[0]);
       setMousePos(pos);
     };
     const touch = (e: TouchEvent) => {
       if (!isDragging || !mousePos) return;
-      const pos: [number,number] = [e.touches[0].clientX, e.touches[0].clientY];
+      const pos: [number, number] = [e.touches[0].clientX, e.touches[0].clientY];
       handleChange(mousePos[0], pos[0]);
       setMousePos(pos);
     };
@@ -69,7 +95,7 @@ function App() {
           tz={e}
           key={i}
           only={tzs.length === 1}
-          onReset={() => setFocusTime(null)}
+          onReset={animateFocusTimeBack}
           onRemove={() => setTzs(tzs.filter((t) => t !== e))}
           focusTime={focusTime || currentTime}
           onWheelX={handleWheelX}
@@ -80,6 +106,7 @@ function App() {
           }}
         />
       )}
+      <AddTZ onAdd={(tz) => setTzs([...tzs, tz])} currentTzs={tzs} />
     </>
   )
 }

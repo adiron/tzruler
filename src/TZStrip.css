@@ -15,6 +15,11 @@
   z-index: 10;
 }
 
+.TZStrip__tzName {
+  font-size: 20px;
+  font-weight: 500;
+}
+
 .TZStrip__ruler {
   position: relative;
 }

@@ -8,14 +8,15 @@
   background-color: var(--color-bg);
   color: var(--color-text);
 
-  --color-strip-divider: #e1e1e1;
-  --color-bg: #fff;
-  --color-bg-dark: #f7f7f7;
-  --color-text: #111;
-  --color-text-light: #4e4e4e;
+  --color-bg: #FDFDFD;
+  --color-strip-divider: #E1E1E1;
+  --color-bg-dark: #FAFAFA;
+  --color-text: #111111;
+  --color-text-light: #4E4E4E;
   --color-text-lighter: #787878;
   --color-text-lightest: #B4B4B4;
-  --color-current: red;
+  --color-current: #FF0000;
+  --color-shadow: rgba(0, 0, 0, 0.06);
 
   --size-padding-base: 24px;
   --size-strip-height: 104px;
@@ -23,7 +24,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-bg: #000;
+    --color-bg: #0A0A0A;
+    --color-strip-divider: #2F2F2F;
+    --color-bg-dark: #252525;
+    --color-text: #F5F5F5;
+    --color-text-light: #E2E2E2;
+    --color-text-lighter: #A9A9A9;
+    --color-text-lightest: #707070;
+    --color-current: #FF6E6E;
+    --color-shadow: rgba(255, 255, 255, 0.12);
   }
 }
 

@@ -11,3 +11,13 @@ export function formatTzName(tzName: string) {
 export function instantToHHMM(t: {hour: number, minute: number}) {
  return `${numberToPaddedString(t.hour)}:${numberToPaddedString(t.minute)}`
 }
+
+// tzOffset is assumed to be a fraction. e.g. 3.5 => +03:30
+export function formatTzOffset(tzOffset: number) {
+  const hours = Math.abs(tzOffset < 0 ? Math.ceil(tzOffset) : Math.floor(tzOffset));
+  const minutes = (Math.abs(tzOffset) - hours) * 60;
+  return (tzOffset < 0 ? "-" : "+") +
+    numberToPaddedString(hours, 2) +
+    ":" +
+    numberToPaddedString(minutes, 2);
+}

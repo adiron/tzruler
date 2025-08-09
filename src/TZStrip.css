@@ -10,18 +10,52 @@
 
 .TZStrip__info {
   background-color: var(--color-bg);
-  box-shadow: 4px 0 7px 0 rgba(0, 0, 0, 0.06);
+  box-shadow: 4px 0 7px 0 var(--color-shadow);
   padding: 0 var(--size-padding-base);
   z-index: 10;
+  display: flex;
+  align-items: center;
+}
+
+
+.TZStrip__info:hover .TZStrip__remove {
+  opacity: 1;
+}
+
+.TZStrip__remove {
+  opacity: 0;
+  color: var(--color-text-lighter);
+  font-size: 13px;
+  transition: 150ms linear opacity;
+}
+.TZStrip__remove:hover {
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+
+.TZStrip__tzInfoContainer {
+  display: flex;
+  gap: 0;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.TZStrip__tzOffset,
+.TZStrip__tzPath {
+  font-size: 13px;
+  color: var(--color-text-lighter);
 }
 
 .TZStrip__tzName {
   font-size: 20px;
   font-weight: 500;
+  color: var(--color-text-light);
 }
 
 .TZStrip__ruler {
   position: relative;
+  cursor: ew-resize;
 }
 
 .TZStrip__focusTimeBar,

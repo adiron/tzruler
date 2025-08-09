@@ -1,6 +1,6 @@
 import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
 import { Temporal } from 'temporal-polyfill';
-import { formatTzName, instantToHHMM, } from './utils';
+import { formatTzName, formatTzOffset, instantToHHMM, } from './utils';
 import { HOUR_SIZE, LINE_POSITION, MS_PER_PIXEL, OVERLAP_PROTECTION } from './constants';
 import { StripHour } from './StripHour';
 import { useTime } from './TimeContext';
@@ -122,10 +122,18 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
     onWheel={e => handleWheelEvent(e)}
   >
     <div className="TZStrip__info">
-      <div className="TZStrip__tzPath">{tzPath}</div>
-      <div className="TZStrip__tzName">{tzName}</div>
-      ({offsetHours})
-      {!only && <button onClick={onRemove}>Remove</button>}
+      <div className="TZStrip__tzInfoContainer">
+        <div className="TZStrip__tzPath">{tzPath}</div>
+        <div className="TZStrip__tzName">{tzName}</div>
+        <div className="TZStrip__tzOffset">{formatTzOffset(offsetHours)}</div>
+      </div>
+      {!only && <button
+        onClick={onRemove}
+        className="TZStrip__remove"
+      >
+        remove
+      </button>
+      }
     </div>
     <div
       className="TZStrip__ruler"
@@ -153,11 +161,11 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
       >
         <div className="TZStrip__focusTimeText">
           {instantToHHMM(zonedFocusTime)}
-          <button 
+          <button
             onClick={onReset}
             className="TZStrip__focusTimeReset"
           >
-          reset
+            reset
           </button>
         </div>
       </div>

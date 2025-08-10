@@ -4,6 +4,7 @@ import { formatTzName, formatTzOffset, instantToHHMM, } from './utils';
 import { HOUR_SIZE, MS_PER_PIXEL, OVERLAP_PROTECTION } from './constants';
 import { StripHour } from './StripHour';
 import { useTime } from './TimeContext';
+import './TZStrip.scss'
 
 export interface TZStripParams {
   tz: string;

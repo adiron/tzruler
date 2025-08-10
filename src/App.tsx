@@ -1,5 +1,4 @@
 import { useEffect, useState, } from 'react'
-import './TZStrip.css'
 import { TopBar } from './TopBar'
 import { TZStrip } from './TZStrip'
 import { MS_PER_PIXEL, SNAP_BACK_DURATION } from './constants'

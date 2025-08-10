@@ -1,3 +1,5 @@
+@import "utils.scss";
+
 .TZStrip {
   height: var(--size-strip-height);
   overflow: hidden;
@@ -6,6 +8,13 @@
   grid-template-columns: 300px 1fr;
   border-bottom: 1px solid var(--color-strip-divider);
   user-select: none;
+
+  @include narrow {
+    grid-template-columns: 1fr;
+    grid-template-rows: min-content var(--size-strip-height);
+    height: auto;
+  }
+  
 
   &__info {
     background-color: var(--color-bg);
@@ -17,6 +26,10 @@
 
     &:hover .TZStrip__remove {
       opacity: 1;
+    }
+    @include narrow {
+      padding: 8px var(--size-padding-base);
+      box-shadow: none;
     }
   }
 
@@ -30,30 +43,52 @@
       color: var(--color-text);
       cursor: pointer;
     }
+
+    @include narrow {
+      opacity: 1;
+    }
   }
 
   &__tzInfoContainer {
     display: flex;
-    gap: 0;
+    gap: 2px;
     flex-direction: column;
     flex-grow: 1;
+
+    @include narrow {
+      flex-direction: row;
+      gap: 4px;
+    }
   }
 
   &__tzOffset,
   &__tzPath {
     font-size: 13px;
     color: var(--color-text-lighter);
+
+    @include narrow {
+      font-size: 15px;
+    }
   }
 
   &__tzName {
     font-size: 20px;
     font-weight: 500;
     color: var(--color-text-light);
+
+    @include narrow {
+      font-size: 15px;
+    }
   }
 
   &__ruler {
     position: relative;
     cursor: ew-resize;
+
+    &:hover .TZStrip__focusTimeReset {
+      opacity: 1;
+    }
+
   }
 
   &__currentTimeBar {
@@ -110,15 +145,15 @@
     z-index: 2;
   }
 
-  &__ruler:hover &__focusTimeReset {
-    opacity: 1;
-  }
-
   &__focusTimeReset {
     margin-left: 8px;
     display: inline-block;
     opacity: 0;
     color: var(--color-text-lightest);
+
+    @include narrow {
+      opacity: 1;
+    }
   }
 
   &__hourMark {

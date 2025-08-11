@@ -1,5 +1,6 @@
 import 'react';
-import { HOUR_DIVISIONS, HOUR_SIZE } from './constants';
+import './StripHour.scss';
+import { useSettings } from './SettingsContext';
 
 interface StripHourParams {
   additional: string | null,
@@ -9,27 +10,31 @@ interface StripHourParams {
 }
 
 export function StripHour({ additional, epochToPixels, text, time }: StripHourParams) {
+  const [ {hourDivisions, hourSize} ] = useSettings();
+
   return <div
-    className={"TZStrip__hourMark " + (additional ? " TZStrip__hourMark--withAdditional" : "")}
+    className={"StripHour__hourMark " + (additional ? " StripHour__hourMark--withAdditional" : "")}
     key={`${text}-${additional}`}
     style={{ left: `${epochToPixels(time)}px` }}
   >
-    {additional && <div className="TZStrip__hourMarkAdditional">{additional}</div>}
+    {additional && <div className="StripHour__hourMarkAdditional">{additional}</div>}
     <div
-      className="TZStrip__hourMarkText"
+      className="StripHour__hourMarkText"
     >{text}</div>
 
     {
-      Array.from({ length: HOUR_DIVISIONS - 1 }, (_, i) => i + 1)
+      Array.from({ length: hourDivisions - 1 }, (_, i) => i + 1)
         .map(i => (
           <div
             key={i}
-            className="TZStrip__hourMarkDivision"
+            className="StripHour__hourMarkDivision"
             style={{
-              transform: `translateX(${(HOUR_SIZE / HOUR_DIVISIONS) * i}px)`
+              transform: `translateX(${(hourSize / hourDivisions) * i}px)`
             }}
           />
         ))
     }
   </div>
 }
+
+

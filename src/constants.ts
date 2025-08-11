@@ -10,6 +10,6 @@ export const LINE_POSITION = 0.5;
 /** How many divisions does an hour have? **/
 export const HOUR_DIVISIONS = 4;
 
-export const OVERLAP_PROTECTION = HOUR_SIZE * .8;
+export const OVERLAP_FACTOR = 1.8;
 
 export const SNAP_BACK_DURATION = 250;

@@ -1,0 +1,39 @@
+.TopBar {
+  display: grid;
+  grid-template-columns: 1fr min-content;
+  padding: 8px 24px;
+  font-size: 12px;
+  background: var(--color-bg-dark);
+  border-bottom: 1px solid var(--color-strip-divider);
+
+
+  &__logo {
+    display: flex;
+    gap: 8px;
+    flex-direction: rows;
+  }
+
+  &__credit {
+    color: var(--color-text-lighter);
+    font-style: italic;
+    text-decoration: none;
+    opacity: 0;
+    transition: 100ms linear opacity;
+  }
+
+  &__credit:hover {
+    text-decoration: underline;
+  }
+
+  &:hover .TopBar__credit {
+    opacity: 1;
+  }
+
+  &__time {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    color: var(--color-text-lighter);
+  }
+}
+

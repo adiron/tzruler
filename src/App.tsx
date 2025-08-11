@@ -1,15 +1,19 @@
 import { useEffect, useState, } from 'react'
 import { TopBar } from './TopBar'
 import { TZStrip } from './TZStrip'
-import { MS_PER_PIXEL, SNAP_BACK_DURATION } from './constants'
+import { SNAP_BACK_DURATION } from './constants'
 import { useTime } from './TimeContext'
 import AddTZ from './AddTZ'
 import { easeInOutCubic } from './ease'
+import { useSettings } from './SettingsContext'
 
 
 function App() {
+  const [{hourSize}] = useSettings();
   const [tzs, setTzs] = useState<string[]>(["Europe/Amsterdam", "Asia/Jerusalem", "America/New_York", "Asia/Kolkata"])
   const [focusTime, setFocusTime] = useState<number | null>();
+
+  const msPerPixel = (60 * 60 * 1000) / hourSize
 
   const currentTime = useTime();
 
@@ -44,8 +48,8 @@ function App() {
     const handleChange = (prev: number, next: number) => {
       // Offset in pixels:
       const sub = prev - next;
-      setFocusTime(
-        Math.round((focusTime || currentTime) + (sub * MS_PER_PIXEL))
+      setFocusTime(focusTime =>
+        Math.round((focusTime || Date.now()) + (sub * msPerPixel))
       )
     }
     const mouse = (e: MouseEvent) => {
@@ -81,7 +85,7 @@ function App() {
 
   function handleWheelX(e: number) {
     setFocusTime(
-      Math.round((focusTime || currentTime) + (e * MS_PER_PIXEL))
+      Math.round((focusTime || currentTime) + (e * msPerPixel))
     )
   }
 

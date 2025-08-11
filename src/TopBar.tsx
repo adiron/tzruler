@@ -1,4 +1,4 @@
-import './TopBar.css'
+import './TopBar.scss'
 import { Temporal } from 'temporal-polyfill';
 import { instantToHHMM, numberToPaddedString } from './utils';
 import { useTime } from './TimeContext';

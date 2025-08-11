@@ -156,44 +156,5 @@
     }
   }
 
-  &__hourMark {
-    background: var(--color-text);
-    width: 1px;
-    bottom: 0;
-    position: absolute;
-    height: calc(var(--size-strip-height) * 0.25);
-
-    &--withAdditional {
-      height: calc(var(--size-strip-height) * 0.5);
-      width: 2px;
-    }
-  }
-
-  &__hourMarkText {
-    color: var(--color-text-lighter);
-    padding-left: 4px;
-    font-size: 13px;
-    position: absolute;
-    bottom: calc(var(--size-strip-height) / 10)
-  }
-
-  &__hourMarkAdditional {
-    color: var(--color-text);
-    font-size: 13px;
-    padding-left: 4px;
-    position: absolute;
-    top: 0;
-    width: 10000px;
-  }
-
-  &__hourMarkDivision {
-    height: calc(var(--size-strip-height) / 13);
-    width: 1px;
-    background: var(--color-text-lightest);
-    bottom: 0;
-    position: absolute;
-  }
 
 }
-
-

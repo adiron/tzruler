@@ -1,10 +1,11 @@
 import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { formatTzName, formatTzOffset, instantToHHMM, } from './utils';
-import { HOUR_SIZE, MS_PER_PIXEL, OVERLAP_PROTECTION } from './constants';
+import { OVERLAP_FACTOR } from './constants';
 import { StripHour } from './StripHour';
 import { useTime } from './TimeContext';
 import './TZStrip.scss'
+import { useSettings } from './SettingsContext';
 
 export interface TZStripParams {
   tz: string;
@@ -43,6 +44,7 @@ function generateMarks(left: number, right: number, tz: string) {
 }
 
 export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, isDirty, onReset }: TZStripParams) {
+  const [{ hourSize }] = useSettings();
   const currentTime = useTime();
   const zonedCurrentTime = Temporal.Instant.fromEpochMilliseconds(currentTime).toZonedDateTimeISO(tz);
   const zonedFocusTime = Temporal.Instant.fromEpochMilliseconds(Math.round(focusTime)).toZonedDateTimeISO(tz);
@@ -53,7 +55,7 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
   const [rulerWidth, setRulerWidth] = useState(0);
 
   // Raw time in the view, in hours.
-  const hoursInView = useMemo(() => rulerWidth / HOUR_SIZE, [rulerWidth]);
+  const hoursInView = useMemo(() => rulerWidth / hourSize, [rulerWidth, hourSize]);
 
   // The leftmost timestamp in epoch time in THE VIEW
   // TODO - fix this code so that it will work for LINE_POSITION != 0.5
@@ -149,7 +151,7 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
           left: `${epochToPixels(currentTime)}px`,
         }}
       >
-        <div className={"TZStrip__currentTimeText" + (isDirty && Math.abs(focusTime - currentTime) < (OVERLAP_PROTECTION * MS_PER_PIXEL) ? " TZStrip__currentTimeText--hidden" : "") + (isDirty ? " TZStrip__currentTimeText--dirty" : "")}>
+        <div className={"TZStrip__currentTimeText" + (isDirty && Math.abs(focusTime - currentTime) < (OVERLAP_FACTOR * hourSize) ? " TZStrip__currentTimeText--hidden" : "") + (isDirty ? " TZStrip__currentTimeText--dirty" : "")}>
           {instantToHHMM(zonedCurrentTime)}
         </div>
       </div>
@@ -172,6 +174,7 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
       </div>
 
       {hourMarks.map((m) => <StripHour
+        key={m.time}
         epochToPixels={epochToPixels}
         additional={m.additional}
         time={m.time}

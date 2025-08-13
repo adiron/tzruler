@@ -1,14 +1,15 @@
-import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
+import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent, type CSSProperties } from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { formatTzName, formatTzOffset, instantToHHMM, } from './utils';
-import { OVERLAP_FACTOR } from './constants';
 import { StripHour } from './StripHour';
 import { useTime } from './TimeContext';
 import './TZStrip.scss'
 import { useSettings } from './SettingsContext';
+import { OVERLAP_HIDE_THRESHOLD } from './constants';
 
 export interface TZStripParams {
   tz: string;
+  referenceTZ: string;
   onRemove: () => void;
   onWheelX: (arg0: number) => void;
   onDragStart: (arg0: [number, number]) => void;
@@ -43,16 +44,30 @@ function generateMarks(left: number, right: number, tz: string) {
   return hours;
 }
 
-export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, isDirty, onReset }: TZStripParams) {
-  const [{ hourSize }] = useSettings();
+export function TZStrip(
+  {
+    tz,
+    referenceTZ,
+    focusTime,
+    onRemove,
+    onWheelX,
+    onDragStart,
+    only,
+    isDirty,
+    onReset,
+  }: TZStripParams) {
+  const [{ hourSize, aheadBehind }] = useSettings();
   const currentTime = useTime();
   const zonedCurrentTime = Temporal.Instant.fromEpochMilliseconds(currentTime).toZonedDateTimeISO(tz);
   const zonedFocusTime = Temporal.Instant.fromEpochMilliseconds(Math.round(focusTime)).toZonedDateTimeISO(tz);
+  const referenceZoneTime = Temporal.Instant.fromEpochMilliseconds(Math.round(focusTime)).toZonedDateTimeISO(referenceTZ);
   // The TZ offset in hours as fractions (e.g. -8.0, +4.5 etc.)
   const offsetHours = zonedFocusTime.offsetNanoseconds / 1e+9 / 60 / 60;
 
   const rulerRef = useRef<HTMLDivElement>(null);
   const [rulerWidth, setRulerWidth] = useState(0);
+
+  const showAheadBehind = aheadBehind && tz != referenceTZ;
 
   // Raw time in the view, in hours.
   const hoursInView = useMemo(() => rulerWidth / hourSize, [rulerWidth, hourSize]);
@@ -94,6 +109,21 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
     const offset = epochMs - leftTimeStamp;
     return (offset / range) * rulerWidth;
   }, [leftTimeStamp, rightTimeStamp, rulerWidth]);
+
+  const renderAheadBehind = useCallback(() => {
+    const length = hourSize * ((zonedFocusTime.offsetNanoseconds - referenceZoneTime.offsetNanoseconds) / 1e9 / 60 / 60);
+    const ahead = length > 0;
+
+    return <div
+      className={"TZStrip__aheadBehind TZStrip__aheadBehind--" + (ahead ? "ahead" : "behind")}
+      style={{
+        width: `${Math.abs(length)}px`,
+        left: ahead ?
+          `${epochToPixels(focusTime) - length}px` :
+          `${epochToPixels(focusTime)}px`,
+      }}
+    />
+  }, [zonedFocusTime, epochToPixels, focusTime, hourSize, referenceZoneTime]);
 
   useLayoutEffect(() => {
     function measure() {
@@ -151,7 +181,12 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
           left: `${epochToPixels(currentTime)}px`,
         }}
       >
-        <div className={"TZStrip__currentTimeText" + (isDirty && Math.abs(focusTime - currentTime) < (OVERLAP_FACTOR * hourSize) ? " TZStrip__currentTimeText--hidden" : "") + (isDirty ? " TZStrip__currentTimeText--dirty" : "")}>
+        <div 
+          className={
+            "TZStrip__currentTimeText" 
+            + (isDirty && Math.abs(epochToPixels(currentTime) - epochToPixels(focusTime)) < OVERLAP_HIDE_THRESHOLD ?
+               " TZStrip__currentTimeText--hidden" : "")
+            + (isDirty ? " TZStrip__currentTimeText--dirty" : "")}>
           {instantToHHMM(zonedCurrentTime)}
         </div>
       </div>
@@ -181,7 +216,12 @@ export function TZStrip({ tz, focusTime, onRemove, onWheelX, onDragStart, only, 
         text={m.text}
       />)}
 
+      {
+        showAheadBehind && renderAheadBehind()
+      }
+
     </div>
   </div>;
 }
+
 

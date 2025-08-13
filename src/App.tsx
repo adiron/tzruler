@@ -1,5 +1,4 @@
 import { useEffect, useState, } from 'react'
-import { TopBar } from './TopBar'
 import { TZStrip } from './TZStrip'
 import { SNAP_BACK_DURATION } from './constants'
 import { useTime } from './TimeContext'
@@ -91,11 +90,11 @@ function App() {
 
   return (
     <>
-      <TopBar />
       {tzs.map(
         (e, i) => <TZStrip
           isDirty={!!focusTime}
           tz={e}
+          referenceTZ={tzs[0]}
           key={i}
           only={tzs.length === 1}
           onReset={animateFocusTimeBack}

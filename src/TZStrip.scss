@@ -150,11 +150,30 @@
     display: inline-block;
     opacity: 0;
     color: var(--color-text-lightest);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--color-text-lighter);
+    }
 
     @include utils.narrow {
       opacity: 1;
     }
   }
 
+  &__aheadBehind {
+    height: var(--size-strip-height);
+    position: absolute;
+    top: 0;
+    z-index: -2;
+
+    &--ahead {
+      background-color: var(--color-bg-ahead);
+    }
+
+    &--behind {
+      background-color: var(--color-bg-behind);
+    }
+  }
 
 }

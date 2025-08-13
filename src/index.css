@@ -17,6 +17,8 @@
   --color-text-lightest: #B4B4B4;
   --color-current: #FF0000;
   --color-shadow: rgba(0, 0, 0, 0.06);
+  --color-bg-behind: hsla(0, 99%, 74%, 0.12);
+  --color-bg-ahead: hsla(206, 99%, 74%, 0.12);
 
   --size-padding-base: 24px;
   --size-strip-height: 104px;

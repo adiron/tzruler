@@ -1,9 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { DEFAULT_SETTINGS } from "./constants";
 
-interface TZRulerSettings {
+export interface TZRulerSettings {
   hourSize: number;
   hourDivisions: number;
+  aheadBehind: boolean;
 }
 
 type TZRulerSettingsContextValue = [ 
@@ -11,15 +13,10 @@ type TZRulerSettingsContextValue = [
   setSettings: React.Dispatch<React.SetStateAction<TZRulerSettings>>
 ]
 
-const defaultSettings: TZRulerSettings = {
-  hourSize: 80,
-  hourDivisions: 4,
-};
-
 const SettingsContext = createContext<TZRulerSettingsContextValue | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [settings, setSettings] = useState<TZRulerSettings>(defaultSettings);
+  const [settings, setSettings] = useState<TZRulerSettings>(DEFAULT_SETTINGS);
 
   return (
     <SettingsContext.Provider value={[ settings, setSettings ]}>

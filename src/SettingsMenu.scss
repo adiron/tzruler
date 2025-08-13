@@ -1,0 +1,25 @@
+.SettingsMenu {
+  height: 1em;
+  position: relative;
+
+  &__button {
+    color: var(--color-text-light);
+    cursor: pointer;
+
+    &:hover, &--open {
+      color: var(--color-text);
+    }
+  }
+
+  &__menu {
+    position: absolute;
+    right: 0;
+    z-index: 10;
+    display: none;
+
+    &--open {
+      display: block;
+    }
+  }
+  // &k yrk sqgl
+}

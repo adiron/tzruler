@@ -1,4 +1,4 @@
-import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent, type CSSProperties } from 'react';
+import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { formatTzName, formatTzOffset, instantToHHMM, } from './utils';
 import { StripHour } from './StripHour';

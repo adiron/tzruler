@@ -14,12 +14,11 @@
   &__menu {
     position: absolute;
     right: 0;
-    z-index: 10;
+    z-index: 100;
     display: none;
 
     &--open {
       display: block;
     }
   }
-  // &k yrk sqgl
 }

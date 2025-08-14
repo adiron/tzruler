@@ -18,9 +18,9 @@ export default function SettingsMenu() {
       }
     };
 
-    window.addEventListener("click", handleOutsideClick);
+    window.addEventListener("mousedown", handleOutsideClick);
     return () => {
-      window.removeEventListener("click", handleOutsideClick);
+      window.removeEventListener("mousedown", handleOutsideClick);
     }
   }, []);
 

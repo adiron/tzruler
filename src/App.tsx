@@ -1,4 +1,4 @@
-import { useEffect, useState, } from 'react'
+import { useEffect, useRef, useState, } from 'react'
 import { TZStrip } from './TZStrip'
 import { SNAP_BACK_DURATION } from './constants'
 import { useTime } from './TimeContext'
@@ -16,8 +16,8 @@ function App() {
 
   const currentTime = useTime();
 
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [mousePos, setMousePos] = useState<[number, number] | null>(null);
+  const isDraggingRef = useRef(false);
+  const mousePosRef = useRef<[number, number] | null>(null);
 
   const animateFocusTimeBack = () => {
     if (focusTime == null) return;
@@ -52,20 +52,20 @@ function App() {
       )
     }
     const mouse = (e: MouseEvent) => {
-      if (!isDragging || !mousePos) return;
+      if (!isDraggingRef.current || !mousePosRef.current) return;
       const pos: [number, number] = [e.clientX, e.clientY];
-      handleChange(mousePos[0], pos[0]);
-      setMousePos(pos);
+      handleChange(mousePosRef.current[0], pos[0]);
+      mousePosRef.current = pos;
     };
     const touch = (e: TouchEvent) => {
-      if (!isDragging || !mousePos) return;
+      if (!isDraggingRef.current || !mousePosRef.current) return;
       const pos: [number, number] = [e.touches[0].clientX, e.touches[0].clientY];
-      handleChange(mousePos[0], pos[0]);
-      setMousePos(pos);
+      handleChange(mousePosRef.current[0], pos[0]);
+      mousePosRef.current = pos;
     };
     const end = () => {
-      setMousePos(null);
-      setIsDragging(false);
+      mousePosRef.current = null;
+      isDraggingRef.current = false;
     }
     window.addEventListener("mousemove", mouse);
     window.addEventListener("mouseup", end);
@@ -80,7 +80,7 @@ function App() {
       window.removeEventListener("touchstart", touch);
       window.removeEventListener("touchend", end);
     }
-  });
+  }, [msPerPixel]);
 
   function handleWheelX(e: number) {
     setFocusTime(
@@ -102,8 +102,8 @@ function App() {
           focusTime={focusTime || currentTime}
           onWheelX={handleWheelX}
           onDragStart={(pos) => {
-            setIsDragging(true);
-            setMousePos(pos);
+            isDraggingRef.current = true;
+            mousePosRef.current = pos;
             if (!focusTime) setFocusTime(currentTime);
           }}
         />

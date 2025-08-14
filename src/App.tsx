@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, } from 'react'
-import { TZStrip } from './TZStrip'
+import { useCallback, useEffect, useRef, useState, } from 'react'
+import TZStrip from './TZStrip'
 import { SNAP_BACK_DURATION } from './constants'
 import { useTime } from './TimeContext'
 import AddTZ from './AddTZ'
@@ -8,7 +8,7 @@ import { useSettings } from './SettingsContext'
 
 
 function App() {
-  const [{hourSize}] = useSettings();
+  const [{ hourSize }] = useSettings();
   const [tzs, setTzs] = useState<string[]>(["Europe/Amsterdam", "Asia/Jerusalem", "America/New_York", "Asia/Kolkata"])
   const [focusTime, setFocusTime] = useState<number | null>();
 
@@ -36,7 +36,7 @@ function App() {
       if (t < 1) {
         requestAnimationFrame(step);
       } else {
-        setFocusTime(null); // finally clear to signal "no focus"
+        setFocusTime(null);
       }
     };
 
@@ -82,6 +82,10 @@ function App() {
     }
   }, [msPerPixel]);
 
+  const handleAddTz = useCallback((tz: string) => {
+    setTzs((tzs) => [...tzs, tz])
+  }, [])
+
   function handleWheelX(e: number) {
     setFocusTime(
       Math.round((focusTime || currentTime) + (e * msPerPixel))
@@ -108,7 +112,7 @@ function App() {
           }}
         />
       )}
-      <AddTZ onAdd={(tz) => setTzs([...tzs, tz])} currentTzs={tzs} />
+      <AddTZ onAdd={handleAddTz} currentTzs={tzs} />
     </>
   )
 }

@@ -1,6 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ALL_TIMEZONES } from "./constants";
-import { formatTzName } from "./utils";
+import { formatTzName, formatTzOffset } from "./utils";
+import { Temporal } from "temporal-polyfill";
+import "./AddTZ.scss";
 
 interface AddTZParams {
   onAdd: (tz: string) => void;
@@ -8,11 +10,37 @@ interface AddTZParams {
 }
 
 export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
-  const availableTzs = useMemo(() => ALL_TIMEZONES.filter(e => !currentTzs.includes(e)), [currentTzs])
-  
-  return <select onChange={(e) => onAdd(e.target.value)}>
-  {
-    availableTzs.map(tz => <option value={tz}>{formatTzName(tz)}</option>)
-  }
-  </select>
+  const [open, setOpen] = useState<boolean>(false);
+  const availableTzs = useMemo<[number, string][]>(() => {
+    const now = Date.now();
+    return ALL_TIMEZONES
+      .filter(e => !currentTzs.includes(e))
+      .map<[number, string]>(tz => {
+        const zonedTime = Temporal.Instant.fromEpochMilliseconds(now).toZonedDateTimeISO(tz);
+        return [zonedTime.offsetNanoseconds / 1e9 / 60 / 60, tz];
+      })
+      .sort((a, b) => a[0] - b[0])
+  }, [currentTzs]
+  )
+
+  const menuItems = useMemo(() => availableTzs.map(([offset, tz]) => (
+    <button
+      className="AddTZ__menuItem"
+      key={tz}
+      onClick={() => { setOpen(false); onAdd(tz) }}
+    >
+      {formatTzOffset(offset)} {formatTzName(tz)}
+    </button>)), [availableTzs, onAdd])
+
+  return <div className="AddTZ">
+    <button onClick={() => setOpen(o => !o)}>
+      + add timezone
+    </button>
+
+    <div className="AddTZ__menu">
+      {
+        open && menuItems
+      }
+    </div>
+  </div>
 }

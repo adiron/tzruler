@@ -44,7 +44,7 @@ function generateMarks(left: number, right: number, tz: string) {
   return hours;
 }
 
-export function TZStrip(
+export default function TZStrip(
   {
     tz,
     referenceTZ,

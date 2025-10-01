@@ -7,6 +7,9 @@ export default function TopBarTime() {
   const utcTime = Temporal.Instant.fromEpochMilliseconds(time).toZonedDateTimeISO("UTC");
   return <div className="TopBar__time">
     <div>
+      UTC
+    </div>
+    <div>
       {utcTime.year}-{numberToPaddedString(utcTime.month)}-{numberToPaddedString(utcTime.day)}
     </div>
     <div>

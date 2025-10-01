@@ -11,6 +11,7 @@ interface AddTZParams {
 
 export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
   const [open, setOpen] = useState<boolean>(false);
+  const [filter, setFilter] = useState<string>('');
   const availableTzs = useMemo<[number, string][]>(() => {
     const now = Date.now();
     return ALL_TIMEZONES
@@ -23,21 +24,30 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
   }, [currentTzs]
   )
 
-  const menuItems = useMemo(() => availableTzs.map(([offset, tz]) => (
-    <button
-      className="AddTZ__menuItem"
-      key={tz}
-      onClick={() => { setOpen(false); onAdd(tz) }}
-    >
-      {formatTzOffset(offset)} {formatTzName(tz)}
-    </button>)), [availableTzs, onAdd])
+  const menuItems = useMemo(
+    () => availableTzs
+      .filter(t => t[1].toLocaleLowerCase().indexOf(filter.toLocaleLowerCase()) !== -1)
+      .map(([offset, tz]) => (
+        <button
+          className="AddTZ__menuItem"
+          key={tz}
+          onClick={() => { setOpen(false); onAdd(tz) }}
+        >
+          {formatTzOffset(offset)} {formatTzName(tz)}
+        </button>)), [availableTzs, onAdd, filter])
 
   return <div className="AddTZ">
-    <button onClick={() => setOpen(o => !o)}>
+    <button onClick={() => { setOpen(o => !o); setFilter("") }}>
       + add timezone
     </button>
 
     <div className="AddTZ__menu">
+      {open && <input
+        placeholder="Filter timezones…"
+        value={filter}
+        onChange={(e) => setFilter(e.target.value)}
+      />
+      }
       {
         open && menuItems
       }

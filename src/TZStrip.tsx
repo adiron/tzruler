@@ -1,6 +1,6 @@
 import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
 import { Temporal } from 'temporal-polyfill';
-import { formatTzName, formatTzOffset, instantToHHMM, } from './utils';
+import { formatTzName, formatTzOffset, instantToHHMM, splitTZComponents, } from './utils';
 import { StripHour } from './StripHour';
 import { useTime } from './TimeContext';
 import './TZStrip.scss'
@@ -17,11 +17,6 @@ export interface TZStripParams {
   focusTime: number;
   isDirty: boolean;
   only: boolean;
-}
-
-function splitTZComponents(tz_: string) {
-  const [head, ...tail] = formatTzName(tz_).split("/").reverse();
-  return [tail.reverse().join(" / "), head]
 }
 
 function generateMarks(left: number, right: number, tz: string) {

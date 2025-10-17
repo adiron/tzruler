@@ -1,3 +1,33 @@
 .AddTZ {
-  height: var(--size-strip-height);
+  padding: var(--size-padding-base);
+
+  &__menu {
+    background-color: var(--color-bg);
+    visibility: hidden;
+
+    &--open {
+      visibility: visible;
+    }
+  }
+
+  &__menuItem {
+    text-align: left;
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__menuItemOffset {
+    color: var(--color-text-lighter);
+  }
+
+  &__list {
+    width: 100%;
+    max-width: 1400px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
+    gap: 8px;
+  }
 }

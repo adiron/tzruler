@@ -21,3 +21,9 @@ export function formatTzOffset(tzOffset: number) {
     ":" +
     numberToPaddedString(minutes, 2);
 }
+
+export function splitTZComponents(tz_: string) {
+  const [head, ...tail] = formatTzName(tz_).split("/").reverse();
+  return [tail.reverse().join(" / "), head]
+}
+

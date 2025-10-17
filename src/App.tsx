@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, } from 'react'
 import TZStrip from './TZStrip'
+import "./App.css";
 import { SNAP_BACK_DURATION } from './constants'
 import { useTime } from './TimeContext'
 import AddTZ from './AddTZ'
@@ -93,7 +94,9 @@ function App() {
   }
 
   return (
-    <>
+    <div
+      className="App__wrapper"
+    >
       {tzs.map(
         (e, i) => <TZStrip
           isDirty={!!focusTime}
@@ -113,7 +116,7 @@ function App() {
         />
       )}
       <AddTZ onAdd={handleAddTz} currentTzs={tzs} />
-    </>
+    </div>
   )
 }
 

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ALL_TIMEZONES } from "./constants";
 import { formatTzName, formatTzOffset } from "./utils";
 import { Temporal } from "temporal-polyfill";
@@ -25,6 +25,18 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
   }, [currentTzs]
   )
 
+  useEffect(() => {
+    const keyEvent = (e: {key: string}) => {
+      if (e.key === "Escape") {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("keydown", keyEvent)
+    return () => {
+      document.removeEventListener("keydown", keyEvent)
+    }
+  }, [setOpen]);
+
   const menuItems = useMemo(
     () => {
       const tzByRegion: Record<string, [number, string][]> = {};
@@ -43,12 +55,12 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
 
       return Object.keys(tzByRegion).sort()
         .map(region => (
-          <div>
-            <h1>{region}</h1>
+          <div key={region}>
+            <h1 className="AddTZ__regionTitle">{region}</h1>
             <div className="AddTZ__list">
               {tzByRegion[region]
                 .map(([offset, tz]) => (
-                  <div>
+                  <div key={tz}>
                     <div
                       role="button"
                       className="AddTZ__menuItem"
@@ -85,10 +97,16 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
     >
       {
         open && <>
+          <button
+            onClick={() => setOpen(false)}
+          >
+            &larr; back
+          </button>
           <input
             placeholder="Filter timezones…"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
+            className="AddTZ__input"
           />
 
           {menuItems}

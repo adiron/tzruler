@@ -4,6 +4,13 @@
   &__menu {
     background-color: var(--color-bg);
     visibility: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    z-index: 100;
+    padding: var(--size-padding-base);
 
     &--open {
       visibility: visible;
@@ -29,5 +36,21 @@
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
     gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  &__regionTitle {
+    font-size: 1rem;
+    color: var(--color-text);
+    font-weight: 600;
+    padding: 0;
+    margin: 0.5rem 0;
+  }
+
+  &__input {
+    font-size: inherit;
+    width: 100%;
+    max-width: 25rem;
+    margin: 1rem 0;
   }
 }

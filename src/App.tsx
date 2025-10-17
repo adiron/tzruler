@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, } from 'react'
 import TZStrip from './TZStrip'
 import "./App.css";
 import { SNAP_BACK_DURATION } from './constants'
@@ -10,7 +10,7 @@ import { useSettings } from './SettingsContext'
 
 function App() {
   const [{ hourSize }] = useSettings();
-  const [tzs, setTzs] = useState<string[]>(["Europe/Amsterdam", "Asia/Jerusalem", "America/New_York", "Asia/Kolkata"])
+  const [tzs, setTzs] = useState<string[]>([])
   const [focusTime, setFocusTime] = useState<number | null>();
 
   const msPerPixel = (60 * 60 * 1000) / hourSize
@@ -44,7 +44,27 @@ function App() {
     requestAnimationFrame(step);
   };
 
+  useLayoutEffect(() => {
+    if (tzs.length === 0) {
+      const storage: string|undefined = localStorage.tzs
+      if (!storage) {
+        // Both tzs and storage are empty => fresh first use!
+        const initial = [Intl.DateTimeFormat().resolvedOptions().timeZone]
+        localStorage.tzs = JSON.stringify(initial)
+        return setTzs(initial);
+      }
+
+      // Load values from storage as there are existing values:
+      return setTzs(JSON.parse(storage));
+    }
+
+    // If tzs.length !== 0, it can be assumed that tzs has been altered.
+    localStorage.tzs = JSON.stringify(tzs);
+
+  }, [tzs])
+
   useEffect(() => {
+
     const handleChange = (prev: number, next: number) => {
       // Offset in pixels:
       const sub = prev - next;

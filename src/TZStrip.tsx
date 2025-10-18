@@ -1,6 +1,6 @@
 import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
 import { Temporal } from 'temporal-polyfill';
-import { formatTzName, formatTzOffset, instantToHHMM, splitTZComponents, } from './utils';
+import { formatTzOffset, instantToHHMM, splitTZComponents, } from './utils';
 import { StripHour } from './StripHour';
 import { useTime } from './TimeContext';
 import './TZStrip.scss'

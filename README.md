@@ -2,6 +2,10 @@
 
 ## What is this thing?
 
-I have colleagues in many different timezones. Usually, you'd get used to people's working hours, and consult their calendar. However, occasionally a question would come up such as, "how about 3:30pm EST?", which has me calculating timezones in my head - usually unsuccessfully.
+**tzruler**, aka *timzone ruler* is tool to compare timezones, in the present, future and past. It is a simple and opinionated tool.
 
-There are many solutions to this issue out there, but I didn't feel like they were precisely what I had in mind. And besides I love a good project.
+The idea came to me because I work with people in many different timezones. At one time, I had to schedule a meeting across 3 timezones, some ahead, some behind me. I wondered if there was a way to put the timezones side-by-side and compare. Unhappy with existing solutions online I made *tzruler*.
+
+## Credits
+
+I (Adi Ron) made this. Shoutout to my wife and dog.

@@ -8,4 +8,4 @@ The idea came to me because I work with people in many different timezones. At o
 
 ## Credits
 
-I (Adi Ron) made this. Shoutout to my wife and dog.
+[Adi Ron](https://adiron.me) made this. Shoutout to my wife and dog.

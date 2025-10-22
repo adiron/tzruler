@@ -37,15 +37,21 @@ export default function SettingsMenu() {
     <div
       className={"SettingsMenu__menu" + (open ? " SettingsMenu__menu--open" : "")}
     >
-      <input
-        onChange={e => setSettings(s => ({ ...s, hourSize: parseInt(e.target.value) }))}
-        value={settings.hourSize}
-      />
-      <input 
-      type="checkbox"
-        onChange={e => setSettings(s => ({ ...s, aheadBehind: e.target.checked }))}
-        checked={settings.aheadBehind}
+      <div className="SettingsMenu__item">
+        <span>Pixels per hour</span>
+        <input
+          onChange={e => setSettings(s => ({ ...s, hourSize: parseInt(e.target.value) }))}
+          value={settings.hourSize}
         />
+      </div>
+      <div className="SettingsMenu__item">
+        <span>Show ahead/behind areas vs. 1st timezone</span>
+        <input
+          type="checkbox"
+          onChange={e => setSettings(s => ({ ...s, aheadBehind: e.target.checked }))}
+          checked={settings.aheadBehind}
+        />
+      </div>
     </div>
   </div>
 }

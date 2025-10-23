@@ -1,0 +1,5 @@
+- [ ] Drag timezones to rearrange
+- [ ] Add jump-to functionality
+- [ ] Fix search (spaces don't quite work)
+- [ ] Add place names so TZs become easier to find
+- [ ] Save settings

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState, } from 'react'
+import { Temporal } from 'temporal-polyfill'
 import TZStrip from './TZStrip'
 import "./App.css";
 import { SNAP_BACK_DURATION } from './constants'
@@ -9,16 +10,68 @@ import { useSettings } from './SettingsContext'
 
 
 function App() {
-  const [{ hourSize }] = useSettings();
+  const [{ hourSize, snapTo }] = useSettings();
   const [tzs, setTzs] = useState<string[]>([])
   const [focusTime, setFocusTime] = useState<number | null>();
 
-  const msPerPixel = (60 * 60 * 1000) / hourSize
+  const msPerPixel = (60 * 60 * 1000) / hourSize;
+
+  // Utility function to snap timestamp to specified minute intervals
+  // Checks ALL displayed timezones and snaps to nearest point where ANY timezone shows a round time
+  const snapTime = useCallback((timestamp: number): number => {
+    if (!snapTo || snapTo === 0 || tzs.length === 0) return timestamp;
+
+    // Calculate snap candidates from all timezones
+    const candidates: number[] = [];
+
+    for (const tz of tzs) {
+      // Convert to this timezone's local time
+      const zoned = Temporal.Instant.fromEpochMilliseconds(timestamp).toZonedDateTimeISO(tz);
+
+      // Get total minutes since start of day
+      const totalMinutes = zoned.hour * 60 + zoned.minute;
+
+      // Calculate both floor and ceil snap points
+      const floorMinutes = Math.floor(totalMinutes / snapTo) * snapTo;
+      const ceilMinutes = Math.ceil(totalMinutes / snapTo) * snapTo;
+
+      // Convert both back to epoch milliseconds
+      for (const snappedMinutes of [floorMinutes, ceilMinutes]) {
+        const snappedHour = Math.floor(snappedMinutes / 60);
+        const snappedMinute = snappedMinutes % 60;
+
+        const snappedZoned = zoned.with({
+          hour: snappedHour,
+          minute: snappedMinute,
+          second: 0,
+          millisecond: 0
+        });
+
+        candidates.push(snappedZoned.toInstant().epochMilliseconds);
+      }
+    }
+
+    // Find the candidate closest to the original timestamp
+    let closest = candidates[0];
+    let minDiff = Math.abs(timestamp - closest);
+
+    for (const candidate of candidates) {
+      const diff = Math.abs(timestamp - candidate);
+      if (diff < minDiff) {
+        minDiff = diff;
+        closest = candidate;
+      }
+    }
+
+    return closest;
+  }, [snapTo, tzs]);
 
   const currentTime = useTime();
 
   const isDraggingRef = useRef(false);
   const mousePosRef = useRef<[number, number] | null>(null);
+  const dragStartTimeRef = useRef<number | null>(null); // Store time when drag starts
+  const dragStartPosRef = useRef<number | null>(null); // Store mouse X position when drag starts
 
   const animateFocusTimeBack = () => {
     if (focusTime == null) return;
@@ -46,7 +99,7 @@ function App() {
 
   useLayoutEffect(() => {
     if (tzs.length === 0) {
-      const storage: string|undefined = localStorage.tzs
+      const storage: string | undefined = localStorage.tzs
       if (!storage) {
         // Both tzs and storage are empty => fresh first use!
         const initial = [Intl.DateTimeFormat().resolvedOptions().timeZone]
@@ -65,29 +118,36 @@ function App() {
 
   useEffect(() => {
 
-    const handleChange = (prev: number, next: number) => {
-      // Offset in pixels:
-      const sub = prev - next;
-      setFocusTime(focusTime =>
-        Math.round((focusTime || Date.now()) + (sub * msPerPixel))
-      )
+    const handleChange = (currentX: number) => {
+      if (dragStartPosRef.current === null || dragStartTimeRef.current === null) return;
+
+      // Calculate offset from where the drag started
+      const pixelOffset = dragStartPosRef.current - currentX;
+      const newTime = dragStartTimeRef.current + (pixelOffset * msPerPixel);
+
+      // Apply snapping to the final calculated time
+      setFocusTime(snapTime(Math.round(newTime)));
     }
+
     const mouse = (e: MouseEvent) => {
-      if (!isDraggingRef.current || !mousePosRef.current) return;
-      const pos: [number, number] = [e.clientX, e.clientY];
-      handleChange(mousePosRef.current[0], pos[0]);
-      mousePosRef.current = pos;
+      if (!isDraggingRef.current) return;
+      handleChange(e.clientX);
+      mousePosRef.current = [e.clientX, e.clientY];
     };
+
     const touch = (e: TouchEvent) => {
-      if (!isDraggingRef.current || !mousePosRef.current) return;
-      const pos: [number, number] = [e.touches[0].clientX, e.touches[0].clientY];
-      handleChange(mousePosRef.current[0], pos[0]);
-      mousePosRef.current = pos;
+      if (!isDraggingRef.current) return;
+      handleChange(e.touches[0].clientX);
+      mousePosRef.current = [e.touches[0].clientX, e.touches[0].clientY];
     };
+
     const end = () => {
       mousePosRef.current = null;
       isDraggingRef.current = false;
+      dragStartPosRef.current = null;
+      dragStartTimeRef.current = null;
     }
+
     window.addEventListener("mousemove", mouse);
     window.addEventListener("mouseup", end);
     window.addEventListener("touchmove", touch);
@@ -101,7 +161,7 @@ function App() {
       window.removeEventListener("touchstart", touch);
       window.removeEventListener("touchend", end);
     }
-  }, [msPerPixel]);
+  }, [msPerPixel, snapTime]);
 
   const handleAddTz = useCallback((tz: string) => {
     setTzs((tzs) => [...tzs, tz])
@@ -109,7 +169,7 @@ function App() {
 
   function handleWheelX(e: number) {
     setFocusTime(
-      Math.round((focusTime || currentTime) + (e * msPerPixel))
+      snapTime(Math.round((focusTime || currentTime) + (e * msPerPixel)))
     )
   }
 
@@ -131,6 +191,8 @@ function App() {
           onDragStart={(pos) => {
             isDraggingRef.current = true;
             mousePosRef.current = pos;
+            dragStartPosRef.current = pos[0]; // Store initial X position
+            dragStartTimeRef.current = focusTime || currentTime; // Store initial time
             if (!focusTime) setFocusTime(currentTime);
           }}
         />

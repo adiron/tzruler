@@ -52,6 +52,47 @@ export default function SettingsMenu() {
           checked={settings.aheadBehind}
         />
       </div>
+      <div className="SettingsMenu__item">
+        <span>Snap to</span>
+        <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <input
+              type="radio"
+              name="snapTo"
+              checked={!settings.snapTo || settings.snapTo === 0}
+              onChange={() => setSettings(s => ({ ...s, snapTo: undefined }))}
+            />
+            None
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <input
+              type="radio"
+              name="snapTo"
+              checked={settings.snapTo === 10}
+              onChange={() => setSettings(s => ({ ...s, snapTo: 10 }))}
+            />
+            10 minutes
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <input
+              type="radio"
+              name="snapTo"
+              checked={settings.snapTo === 15}
+              onChange={() => setSettings(s => ({ ...s, snapTo: 15 }))}
+            />
+            15 minutes
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <input
+              type="radio"
+              name="snapTo"
+              checked={settings.snapTo === 30}
+              onChange={() => setSettings(s => ({ ...s, snapTo: 30 }))}
+            />
+            30 minutes
+          </label>
+        </div>
+      </div>
     </div>
   </div>
 }

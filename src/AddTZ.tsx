@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ALL_TIMEZONES } from "./constants";
+import { ALL_TIMEZONES, getAliasesByTimezone } from "./constants";
 import { formatTzName, formatTzOffset } from "./utils";
 import { Temporal } from "temporal-polyfill";
 import "./AddTZ.scss";
@@ -12,6 +12,13 @@ interface AddTZParams {
 export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
   const [open, setOpen] = useState<boolean>(false);
   const [filter, setFilter] = useState<string>('');
+
+  const aliasesByTz = useMemo(() => {
+    const result = getAliasesByTimezone();
+    console.log('Aliases map:', result);
+    return result;
+  }, []);
+
   // This array is formmated as [offset: number, name: string]
   const availableTzs = useMemo<[number, string][]>(() => {
     const now = Date.now();
@@ -40,9 +47,32 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
   const menuItems = useMemo(
     () => {
       const tzByRegion: Record<string, [number, string][]> = {};
+
+      // Normalize filter: keep only alphanumeric characters
+      const normalizedFilter = filter.toLowerCase().replace(/[^a-z0-9]/g, '');
+
       availableTzs
         // Filter out timezones that do not match filter
-        .filter(t => t[1].toLocaleLowerCase().indexOf(filter.toLocaleLowerCase()) !== -1)
+        .filter(t => {
+          if (!normalizedFilter) return true;
+
+          const tzName = t[1];
+          // Normalize tz name: keep only alphanumeric characters
+          // "America/New_York" -> "americanewyork"
+          // "Europe/Paris" -> "europeparis"
+          const normalizedTz = tzName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+          if (normalizedTz.includes(normalizedFilter)) return true;
+
+          const aliases = aliasesByTz[tzName];
+          if (aliases) {
+            return aliases.some(alias =>
+              alias.toLowerCase().replace(/[^a-z0-9]/g, '').includes(normalizedFilter)
+            );
+          }
+
+          return false;
+        })
         .forEach(tz => {
           const tzPath = tz[1].split("/")[0];
 
@@ -77,7 +107,7 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
           </div>
         ))
     }
-    , [availableTzs, onAdd, filter])
+    , [availableTzs, onAdd, filter, aliasesByTz])
 
   return <div className="AddTZ">
 

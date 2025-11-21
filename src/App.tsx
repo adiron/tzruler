@@ -22,48 +22,32 @@ function App() {
     if (!snapTo || snapTo === 0 || tzs.length === 0) return timestamp;
 
     // Calculate snap candidates from all timezones
-    const candidates: number[] = [];
-
-    for (const tz of tzs) {
+    const candidates = tzs.flatMap(tz => {
       // Convert to this timezone's local time
       const zoned = Temporal.Instant.fromEpochMilliseconds(timestamp).toZonedDateTimeISO(tz);
 
       // Get total minutes since start of day
       const totalMinutes = zoned.hour * 60 + zoned.minute;
 
-      // Calculate both floor and ceil snap points
-      const floorMinutes = Math.floor(totalMinutes / snapTo) * snapTo;
-      const ceilMinutes = Math.ceil(totalMinutes / snapTo) * snapTo;
-
-      // Convert both back to epoch milliseconds
-      for (const snappedMinutes of [floorMinutes, ceilMinutes]) {
+      // Calculate both floor and ceil snap points and convert back to epoch milliseconds
+      return [Math.floor, Math.ceil].map(fn => {
+        const snappedMinutes = fn(totalMinutes / snapTo) * snapTo;
         const snappedHour = Math.floor(snappedMinutes / 60);
         const snappedMinute = snappedMinutes % 60;
 
-        const snappedZoned = zoned.with({
+        return zoned.with({
           hour: snappedHour,
           minute: snappedMinute,
           second: 0,
           millisecond: 0
-        });
-
-        candidates.push(snappedZoned.toInstant().epochMilliseconds);
-      }
-    }
+        }).toInstant().epochMilliseconds;
+      });
+    });
 
     // Find the candidate closest to the original timestamp
-    let closest = candidates[0];
-    let minDiff = Math.abs(timestamp - closest);
-
-    for (const candidate of candidates) {
-      const diff = Math.abs(timestamp - candidate);
-      if (diff < minDiff) {
-        minDiff = diff;
-        closest = candidate;
-      }
-    }
-
-    return closest;
+    return candidates.reduce((best, candidate) =>
+      Math.abs(timestamp - candidate) < Math.abs(timestamp - best) ? candidate : best
+    );
   }, [snapTo, tzs]);
 
   const currentTime = useTime();

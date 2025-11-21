@@ -26,7 +26,7 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
   )
 
   useEffect(() => {
-    const keyEvent = (e: {key: string}) => {
+    const keyEvent = (e: { key: string }) => {
       if (e.key === "Escape") {
         setOpen(false);
       }
@@ -60,24 +60,19 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
             <div className="AddTZ__list">
               {tzByRegion[region]
                 .map(([offset, tz]) => (
-                  <div key={tz}>
-                    <div
-                      role="button"
-                      className="AddTZ__menuItem"
-                      key={tz}
-                      onClick={() => { setOpen(false); onAdd(tz); }}
-                    >
-                      <span className="AddTZ__menuItemOffset">
-                        {formatTzOffset(offset)}
-                      </span>
-                      {' '}
-                      {(() => {
-                        const formatted = formatTzName(tz)
-                        return formatted.split("/").slice(1).join("/");
-                      })()}
-                    </div>
-                  </div>)
-                )}
+                  <div
+                    key={tz}
+                    role="button"
+                    className="AddTZ__menuItem"
+                    onClick={() => { setOpen(false); onAdd(tz); }}
+                  >
+                    <span className="AddTZ__menuItemOffset">
+                      {formatTzOffset(offset)}
+                    </span>
+                    {' '}
+                    {formatTzName(tz).split("/").slice(1).join("/")}
+                  </div>
+                ))}
             </div>
           </div>
         ))

@@ -55,42 +55,22 @@ export default function SettingsMenu() {
       <div className="SettingsMenu__item">
         <span>Snap to</span>
         <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <input
-              type="radio"
-              name="snapTo"
-              checked={!settings.snapTo || settings.snapTo === 0}
-              onChange={() => setSettings(s => ({ ...s, snapTo: undefined }))}
-            />
-            None
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <input
-              type="radio"
-              name="snapTo"
-              checked={settings.snapTo === 10}
-              onChange={() => setSettings(s => ({ ...s, snapTo: 10 }))}
-            />
-            10 minutes
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <input
-              type="radio"
-              name="snapTo"
-              checked={settings.snapTo === 15}
-              onChange={() => setSettings(s => ({ ...s, snapTo: 15 }))}
-            />
-            15 minutes
-          </label>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <input
-              type="radio"
-              name="snapTo"
-              checked={settings.snapTo === 30}
-              onChange={() => setSettings(s => ({ ...s, snapTo: 30 }))}
-            />
-            30 minutes
-          </label>
+          {[
+            { value: undefined, label: 'None' },
+            { value: 10, label: '10 minutes' },
+            { value: 15, label: '15 minutes' },
+            { value: 30, label: '30 minutes' }
+          ].map(option => (
+            <label key={option.value ?? 'none'} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <input
+                type="radio"
+                name="snapTo"
+                checked={!settings.snapTo ? option.value === undefined : settings.snapTo === option.value}
+                onChange={() => setSettings(s => ({ ...s, snapTo: option.value }))}
+              />
+              {option.label}
+            </label>
+          ))}
         </div>
       </div>
     </div>

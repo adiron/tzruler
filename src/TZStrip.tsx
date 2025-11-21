@@ -67,31 +67,25 @@ export default function TZStrip(
   // Raw time in the view, in hours.
   const hoursInView = useMemo(() => rulerWidth / hourSize, [rulerWidth, hourSize]);
 
+  // Helper to calculate overflow timestamps
+  const getOverflowTimestamp = (baseTime: number, hourOffset: number) =>
+    Temporal.Instant
+      .fromEpochMilliseconds(Math.round(baseTime))
+      .toZonedDateTimeISO(tz)
+      .with({ minute: 0, second: 0, millisecond: 0 })
+      .add({ hours: hourOffset })
+      .toInstant()
+      .epochMilliseconds;
+
   // The leftmost timestamp in epoch time in THE VIEW
   // TODO - fix this code so that it will work for LINE_POSITION != 0.5
   const leftTimeStamp = Math.round(focusTime) - (hoursInView / 2) * 60 * 60 * 1000;
-
-  const leftTimeStampOverflow = Temporal
-    .Instant
-    .fromEpochMilliseconds(Math.round(leftTimeStamp))
-    .toZonedDateTimeISO(tz)
-    .with({ minute: 0, second: 0, millisecond: 0 })
-    // This is -2 on purpose
-    .add({ hours: -2 })
-    .toInstant()
-    .epochMilliseconds;
+  const leftTimeStampOverflow = getOverflowTimestamp(leftTimeStamp, -2); // -2 on purpose
 
   // The rightmost timestamp in epoch time in THE VIEW
   // TODO - fix this code so that it will work for LINE_POSITION != 0.5
   const rightTimeStamp = Math.round(focusTime) + (hoursInView / 2) * 60 * 60 * 1000;
-  const rightTimeStampOverflow = Temporal
-    .Instant
-    .fromEpochMilliseconds(Math.round(rightTimeStamp))
-    .toZonedDateTimeISO(tz)
-    .with({ minute: 0, second: 0, millisecond: 0 })
-    .add({ hours: 1 })
-    .toInstant()
-    .epochMilliseconds;
+  const rightTimeStampOverflow = getOverflowTimestamp(rightTimeStamp, 1);
 
 
   const hourMarks = useMemo(
@@ -176,18 +170,17 @@ export default function TZStrip(
           left: `${epochToPixels(currentTime)}px`,
         }}
       >
-        <div 
-          className={
-            "TZStrip__currentTimeText" 
-            + (isDirty && Math.abs(epochToPixels(currentTime) - epochToPixels(focusTime)) < OVERLAP_HIDE_THRESHOLD ?
-               " TZStrip__currentTimeText--hidden" : "")
-            + (isDirty ? " TZStrip__currentTimeText--dirty" : "")}>
+        <div
+          className={`TZStrip__currentTimeText${isDirty && Math.abs(epochToPixels(currentTime) - epochToPixels(focusTime)) < OVERLAP_HIDE_THRESHOLD
+            ? ' TZStrip__currentTimeText--hidden'
+            : ''
+            }${isDirty ? ' TZStrip__currentTimeText--dirty' : ''}`}>
           {instantToHHMM(zonedCurrentTime)}
         </div>
       </div>
 
       <div
-        className={"TZStrip__focusTimeBar" + (isDirty ? "" : " TZStrip__focusTimeBar--hidden")}
+        className={`TZStrip__focusTimeBar${isDirty ? '' : ' TZStrip__focusTimeBar--hidden'}`}
         style={{
           left: `${epochToPixels(focusTime)}px`,
         }}

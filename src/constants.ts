@@ -18,6 +18,6 @@ export const DEFAULT_SETTINGS: TZRulerSettings = {
   /** Ahead-behind lines **/
   aheadBehind: false,
   /** Snap-to interval in minutes (15 = snap to :00, :15, :30, :45) **/
-  snapTo: 15,
+  snapTo: undefined,
 };
 

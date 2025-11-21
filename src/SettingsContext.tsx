@@ -6,7 +6,7 @@ export interface TZRulerSettings {
   hourSize: number;
   hourDivisions: number;
   aheadBehind: boolean;
-  snapTo?: number; // Minute interval for snapping (e.g., 15 = snap to :00, :15, :30, :45). undefined = no snapping
+  snapTo?: number;
 }
 
 type TZRulerSettingsContextValue = [
@@ -23,10 +23,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const stored = localStorage.getItem('settings');
       if (stored) {
         const parsed = JSON.parse(stored) as Partial<TZRulerSettings>;
-        // Migrate: add snapTo if missing
-        if (parsed.snapTo === undefined) {
-          parsed.snapTo = DEFAULT_SETTINGS.snapTo;
-        }
         return { ...DEFAULT_SETTINGS, ...parsed };
       }
     } catch (e) {

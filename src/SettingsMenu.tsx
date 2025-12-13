@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, } from "react";
 import { useSettings } from "./SettingsContext";
 import "./SettingsMenu.scss";
+import RadioButtons from "./RadioButtons";
 
 export default function SettingsMenu() {
   const [settings, setSettings] = useSettings();
@@ -38,40 +39,41 @@ export default function SettingsMenu() {
       className={"SettingsMenu__menu" + (open ? " SettingsMenu__menu--open" : "")}
     >
       <div className="SettingsMenu__item">
-        <span>Pixels per hour</span>
-        <input
-          onChange={e => setSettings(s => ({ ...s, hourSize: parseInt(e.target.value) }))}
+        <span>Timeline Scale</span>
+        <RadioButtons<number>
+          options={[
+            { value: 60, label: "Micro" },
+            { value: 80, label: "Standard (default)" },
+            { value: 120, label: "Big" },
+            { value: 160, label: "Macro" },
+          ]}
           value={settings.hourSize}
+          onChange={v => setSettings(s => ({ ...s, hourSize: v }))}
         />
       </div>
       <div className="SettingsMenu__item">
-        <span>Show ahead/behind areas vs. 1st timezone</span>
-        <input
-          type="checkbox"
-          onChange={e => setSettings(s => ({ ...s, aheadBehind: e.target.checked }))}
-          checked={settings.aheadBehind}
+        <span>Snapping</span>
+        <RadioButtons<number | undefined>
+          options={[
+            { value: undefined, label: "No snapping" },
+            { value: 15, label: "15 minutes (default)" },
+            { value: 30, label: "30 minutes" },
+            { value: 60, label: "1 hour" },
+          ]}
+          value={settings.snapTo}
+          onChange={v => setSettings(s => ({ ...s, snapTo: v }))}
         />
       </div>
       <div className="SettingsMenu__item">
-        <span>Snap to</span>
-        <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
-          {[
-            { value: undefined, label: 'None' },
-            { value: 10, label: '10 minutes' },
-            { value: 15, label: '15 minutes' },
-            { value: 30, label: '30 minutes' }
-          ].map(option => (
-            <label key={option.value ?? 'none'} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <input
-                type="radio"
-                name="snapTo"
-                checked={!settings.snapTo ? option.value === undefined : settings.snapTo === option.value}
-                onChange={() => setSettings(s => ({ ...s, snapTo: option.value }))}
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
+        <label>
+          <input
+            type="checkbox"
+            onChange={e => setSettings(s => ({ ...s, aheadBehind: e.target.checked }))}
+            checked={settings.aheadBehind}
+            style={{marginRight: "8px"}}
+          />
+          Show Ahead/Behind Range
+        </label>
       </div>
     </div>
   </div>

@@ -9,6 +9,7 @@
   color: var(--color-text);
 
   --color-bg: #FDFDFD;
+  --color-bg-hover: #FAFAFA;
   --color-strip-divider: #E1E1E1;
   --color-bg-dark: #FAFAFA;
   --color-text: #111111;
@@ -27,6 +28,7 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --color-bg: #0A0A0A;
+    --color-bg-hover: #111111;
     --color-strip-divider: #2F2F2F;
     --color-bg-dark: #252525;
     --color-text: #F5F5F5;

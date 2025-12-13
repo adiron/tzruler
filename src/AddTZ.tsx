@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ALL_TIMEZONES, getAliasesByTimezone } from "./constants";
 import { formatTzName, formatTzOffset } from "./utils";
 import { Temporal } from "temporal-polyfill";
@@ -12,10 +12,10 @@ interface AddTZParams {
 export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
   const [open, setOpen] = useState<boolean>(false);
   const [filter, setFilter] = useState<string>('');
+  const input = useRef<HTMLInputElement>(null);
 
   const aliasesByTz = useMemo(() => {
     const result = getAliasesByTimezone();
-    console.log('Aliases map:', result);
     return result;
   }, []);
 
@@ -33,11 +33,18 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
   )
 
   useEffect(() => {
+    if (open && input.current !== null) {
+      input.current.focus();
+    }
+  }, [open])
+
+  useEffect(() => {
     const keyEvent = (e: { key: string }) => {
       if (e.key === "Escape") {
         setOpen(false);
       }
     }
+
     document.addEventListener("keydown", keyEvent)
     return () => {
       document.removeEventListener("keydown", keyEvent)
@@ -111,7 +118,7 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
 
   return <div className="AddTZ">
 
-    <button onClick={() => { setOpen(o => !o); setFilter("") }}>
+    <button className="AddTZ__button" onClick={() => { setOpen(o => !o); setFilter("") }}>
       + add timezone
     </button>
     <div
@@ -123,17 +130,18 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
       {
         open && <>
           <button
+            className="AddTZ__back"
             onClick={() => setOpen(false)}
           >
             &larr; back
           </button>
           <input
+            ref={input}
             placeholder="Filter timezones…"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
             className="AddTZ__input"
           />
-
           {menuItems}
         </>
       }

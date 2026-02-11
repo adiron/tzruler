@@ -1,3 +1,5 @@
+@use "utils.scss";
+
 :root {
   font-family: Inter, Arial, sans-serif;
   font-variant-numeric: lining-nums tabular-nums;
@@ -21,8 +23,12 @@
   --color-bg-behind: hsla(0, 99%, 74%, 0.12);
   --color-bg-ahead: hsla(206, 99%, 74%, 0.12);
 
-  --size-padding-base: 24px;
+  --size-padding-base: 32px;
   --size-strip-height: 104px;
+
+  @include utils.narrow {
+    --size-padding-base: 16px;
+  }
 }
 
 @media (prefers-color-scheme: dark) {

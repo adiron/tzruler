@@ -34,6 +34,7 @@
     }
     @include utils.narrow {
       padding: 8px var(--size-padding-base);
+      gap: 8px;
       box-shadow: none;
     }
   }
@@ -55,6 +56,8 @@
   }
 
   &__dragHandle {
+    position: absolute;
+    left: 4px;
     width: 28px;
     height: 52px;
     display: flex;
@@ -63,24 +66,39 @@
     cursor: grab;
     touch-action: none;
     flex-shrink: 0;
-    border-radius: 6px;
+
+    @include utils.narrow {
+      position: relative;
+      left: 0;
+      width: 18px;
+      height: 24px;
+      // Cosmetic fix to make everything align nicely:
+      margin-left: -4px;
+    }
 
     &:active {
       cursor: grabbing;
-    }
-
-    &:hover .TZStrip__dragHandleIcon {
-      opacity: 1;
     }
   }
 
   &__dragHandleIcon {
     width: 12px;
     height: 24px;
-    opacity: 0.72;
+    opacity: 0.20;
     transition: 120ms linear opacity;
     background-image: radial-gradient(circle, var(--color-text-lightest) 1px, transparent 1px);
     background-size: 6px 6px;
+
+    .TZStrip:hover & {
+      opacity: 1;
+    }
+
+    @include utils.narrow {
+      opacity: 1;
+      width: 8px;
+      height: 16px;
+      background-size: 4px 4px;
+    }
   }
 
   &__tzInfoContainer {

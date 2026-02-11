@@ -24,13 +24,15 @@ export const DEFAULT_SETTINGS: TZRulerSettings = {
 
 export const TIMEZONE_ALIASES: [string[], string[]][] = [
   [["CET", "CEST"], ["Europe/Paris", "Europe/Berlin", "Europe/Madrid", "Europe/Rome", "Europe/Amsterdam", "Europe/Brussels", "Europe/Vienna", "Europe/Warsaw", "Europe/Stockholm", "Europe/Oslo", "Europe/Copenhagen"]],
-  [["EST", "EDT", "Eastern Time"], ["America/New_York", "America/Toronto", "America/Detroit", "America/Montreal", "America/Indianapolis"]],
-  [["PST", "PDT", "Pacific Time"], ["America/Los_Angeles", "America/Vancouver", "America/Tijuana"]],
-  [["CST", "CDT", "Central Time"], ["America/Chicago", "America/Mexico_City", "America/Winnipeg", "America/Regina"]],
-  [["MST", "MDT", "Mountain Time"], ["America/Denver", "America/Edmonton", "America/Phoenix"]],
+  [["EST", "EDT", "ET", "Eastern Time", "US/Eastern", "Eastern", "New York", "NYC", "Boston", "Philadelphia", "Washington DC", "Miami", "Atlanta"], ["America/New_York", "America/Toronto", "America/Detroit", "America/Montreal", "America/Indianapolis", "America/Indiana/Indianapolis", "America/Louisville", "America/Kentucky/Louisville", "America/Kentucky/Monticello"]],
+  [["CST", "CDT", "CT", "Central Time", "US/Central", "Central", "Chicago", "Dallas", "Houston", "Minneapolis", "New Orleans"], ["America/Chicago", "America/Mexico_City", "America/Winnipeg", "America/Regina", "America/Indiana/Knox", "America/Knox_IN", "America/North_Dakota/Center", "America/North_Dakota/New_Salem", "America/North_Dakota/Beulah"]],
+  [["MST", "MDT", "MT", "Mountain Time", "US/Mountain", "Mountain", "Denver", "Salt Lake City", "Boise", "Phoenix", "Arizona"], ["America/Denver", "America/Edmonton", "America/Boise", "America/Phoenix", "America/Shiprock"]],
+  [["PST", "PDT", "PT", "Pacific Time", "US/Pacific", "Pacific", "Los Angeles", "LA", "San Francisco", "Seattle", "Las Vegas", "San Diego"], ["America/Los_Angeles", "America/Vancouver", "America/Tijuana"]],
+  [["AKST", "AKDT", "AKT", "Alaska", "US/Alaska", "Anchorage", "Juneau"], ["America/Anchorage", "America/Juneau", "America/Sitka", "America/Metlakatla", "America/Nome", "America/Yakutat"]],
+  [["HST", "HAST", "Hawaii", "Hawaiian Time", "US/Hawaii", "Honolulu"], ["Pacific/Honolulu"]],
+  [["AST", "Atlantic Time", "Puerto Rico", "San Juan"], ["America/Puerto_Rico", "America/St_Thomas"]],
   [["GMT", "BST", "UK"], ["Europe/London", "Europe/Dublin", "Europe/Lisbon"]],
   [["UTC"], ["Etc/UTC", "Universal"]],
-  [["IST"], ["Asia/Kolkata", "Asia/Colombo"]],
   [["JST"], ["Asia/Tokyo"]],
   [["AEST", "AEDT"], ["Australia/Sydney", "Australia/Melbourne", "Australia/Hobart", "Australia/Canberra"]],
   [["AEST"], ["Australia/Brisbane"]], // Brisbane no DST
@@ -41,6 +43,7 @@ export const TIMEZONE_ALIASES: [string[], string[]][] = [
   [["SGT"], ["Asia/Singapore"]],
   [["HKT"], ["Asia/Hong_Kong"]],
   [["KST"], ["Asia/Seoul"]],
+  [["IST"], ["Asia/Kolkata", "Asia/Colombo"]]
 ];
 
 /**

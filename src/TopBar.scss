@@ -1,3 +1,5 @@
+@use "utils.scss";
+
 .TopBar {
   display: grid;
   grid-template-columns: 1fr min-content min-content min-content;
@@ -36,6 +38,9 @@
     flex-direction: row;
     gap: 8px;
     color: var(--color-text-lighter);
+    @include utils.narrow {
+      display: none;
+    }
   }
 
   &__jumpDate {

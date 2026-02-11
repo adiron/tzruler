@@ -33,7 +33,7 @@ export function TopBar({ selectedDate, onNavigateToDate }: TopBarProps) {
 
     <div className="TopBar__jumpDate">
       <button className="TopBar__jumpDateButton" onClick={openDatePicker}>
-        jump to date
+        jump
       </button>
       <input
         ref={dateInputRef}

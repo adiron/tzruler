@@ -1,3 +1,14 @@
 .App__wrapper {
   position: relative;
 }
+
+.App__reorderLine {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-text);
+  transform: translateY(-1px);
+  pointer-events: none;
+  z-index: 50;
+}

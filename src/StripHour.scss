@@ -11,6 +11,10 @@
       height: calc(var(--size-strip-height) * 0.5);
       width: 2px;
     }
+
+    &--differentYear {
+      background: var(--color-text-lightest);
+    }
   }
 
   &__hourMarkAdditional {
@@ -20,6 +24,10 @@
     position: absolute;
     top: 0;
     width: 10000px;
+
+    &--differentYear {
+      color: var(--color-text-lighter);
+    }
   }
 
   &__hourMarkText {
@@ -39,4 +47,3 @@
   }
 
 }
-

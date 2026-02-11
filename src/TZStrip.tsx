@@ -1,4 +1,13 @@
-import { useRef, useState, useLayoutEffect, useMemo, useCallback, type WheelEvent } from 'react';
+import {
+  useRef,
+  useState,
+  useLayoutEffect,
+  useMemo,
+  useCallback,
+  type WheelEvent,
+  type MouseEvent as ReactMouseEvent,
+  type TouchEvent as ReactTouchEvent
+} from 'react';
 import { Temporal } from 'temporal-polyfill';
 import { formatTzOffset, instantToHHMM, splitTZComponents, } from './utils';
 import { StripHour } from './StripHour';
@@ -13,14 +22,17 @@ export interface TZStripParams {
   onRemove: () => void;
   onWheelX: (arg0: number) => void;
   onDragStart: (arg0: [number, number]) => void;
+  onReorderDragStart: (arg0: [number, number]) => void;
   onReset: () => void;
   focusTime: number;
   isDirty: boolean;
   only: boolean;
+  isReorderDragging: boolean;
 }
 
 function generateMarks(left: number, right: number, tz: string) {
   const hours = [];
+  const currentYear = Temporal.Now.zonedDateTimeISO(tz).year;
 
   let epoch = left;
 
@@ -28,10 +40,15 @@ function generateMarks(left: number, right: number, tz: string) {
     const t = Temporal.Instant.fromEpochMilliseconds(epoch)
       .add({ hours: 1 })
       .toZonedDateTimeISO(tz)
+    const showDayLabel = t.hour === 0;
+    const isDifferentYear = showDayLabel && t.year !== currentYear;
     hours.push({
       time: t.toInstant().epochMilliseconds,
       text: instantToHHMM(t),
-      additional: t.hour === 0 ? `${t.toLocaleString('en-US', { month: 'short' })} ${t.day}` : null
+      additional: showDayLabel
+        ? `${t.toLocaleString('en-US', { month: 'short' })} ${t.day}${isDifferentYear ? `, ${t.year}` : ''}`
+        : null,
+      additionalDifferentYear: isDifferentYear,
     })
     epoch = t.toInstant().epochMilliseconds;
   }
@@ -47,9 +64,11 @@ export default function TZStrip(
     onRemove,
     onWheelX,
     onDragStart,
+    onReorderDragStart,
     only,
     isDirty,
     onReset,
+    isReorderDragging,
   }: TZStripParams) {
   const [{ hourSize, aheadBehind }] = useSettings();
   const currentTime = useTime();
@@ -139,11 +158,29 @@ export default function TZStrip(
     [onWheelX]
   );
 
+  const handleReorderMouseDown = useCallback((e: ReactMouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    onReorderDragStart([e.clientX, e.clientY]);
+  }, [onReorderDragStart]);
+
+  const handleReorderTouchStart = useCallback((e: ReactTouchEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    onReorderDragStart([e.touches[0].clientX, e.touches[0].clientY]);
+  }, [onReorderDragStart]);
+
   return <div
-    className="TZStrip"
+    className={`TZStrip${isReorderDragging ? ' TZStrip--reorderDragging' : ''}`}
     onWheel={e => handleWheelEvent(e)}
   >
     <div className="TZStrip__info">
+      <button
+        className="TZStrip__dragHandle"
+        aria-label="Reorder timezone"
+        onMouseDown={handleReorderMouseDown}
+        onTouchStart={handleReorderTouchStart}
+      >
+        <span className="TZStrip__dragHandleIcon" />
+      </button>
       <div className="TZStrip__tzInfoContainer">
         <div className="TZStrip__tzPath">{tzPath}</div>
         <div className="TZStrip__tzName">{tzName}</div>
@@ -200,6 +237,7 @@ export default function TZStrip(
         key={m.time}
         epochToPixels={epochToPixels}
         additional={m.additional}
+        additionalDifferentYear={m.additionalDifferentYear}
         time={m.time}
         text={m.text}
       />)}
@@ -211,5 +249,3 @@ export default function TZStrip(
     </div>
   </div>;
 }
-
-

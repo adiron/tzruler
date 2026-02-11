@@ -1,8 +1,10 @@
+@use "utils.scss";
+
 .TopBar {
   display: grid;
-  grid-template-columns: 1fr min-content min-content;
+  grid-template-columns: 1fr min-content min-content min-content;
   gap: 8px;
-  padding: 8px 24px;
+  padding: 8px var(--size-padding-base);
   font-size: 12px;
   background: var(--color-bg-dark);
   border-bottom: 1px solid var(--color-strip-divider);
@@ -36,6 +38,43 @@
     flex-direction: row;
     gap: 8px;
     color: var(--color-text-lighter);
+    @include utils.narrow {
+      display: none;
+    }
+  }
+
+  &__jumpDate {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  &__jumpDateButton {
+    color: var(--color-text-light);
+    cursor: pointer;
+    white-space: nowrap;
+
+    &:hover {
+      color: var(--color-text);
+    }
+  }
+
+  &__jumpDateInput {
+    background: var(--color-bg);
+    color: var(--color-text-light);
+    border: 1px solid var(--color-strip-divider);
+    border-radius: 4px;
+    padding: 2px 4px;
+    font-size: 12px;
+    line-height: 1.2;
+    font-family: inherit;
+  }
+
+  &__jumpDateInput--hidden {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
   }
 }
-

@@ -9,6 +9,10 @@
   border-bottom: 1px solid var(--color-strip-divider);
   user-select: none;
 
+  &--reorderDragging {
+    opacity: 0.45;
+  }
+
   @include utils.narrow {
     grid-template-columns: 1fr;
     grid-template-rows: min-content var(--size-strip-height);
@@ -23,12 +27,14 @@
     z-index: 10;
     display: flex;
     align-items: center;
+    gap: 12px;
 
     &:hover .TZStrip__remove {
       opacity: 1;
     }
     @include utils.narrow {
       padding: 8px var(--size-padding-base);
+      gap: 8px;
       box-shadow: none;
     }
   }
@@ -46,6 +52,52 @@
 
     @include utils.narrow {
       opacity: 1;
+    }
+  }
+
+  &__dragHandle {
+    position: absolute;
+    left: 4px;
+    width: 28px;
+    height: 52px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+    touch-action: none;
+    flex-shrink: 0;
+
+    @include utils.narrow {
+      position: relative;
+      left: 0;
+      width: 18px;
+      height: 24px;
+      // Cosmetic fix to make everything align nicely:
+      margin-left: -4px;
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
+
+  &__dragHandleIcon {
+    width: 12px;
+    height: 24px;
+    opacity: 0.20;
+    transition: 120ms linear opacity;
+    background-image: radial-gradient(circle, var(--color-text-lightest) 1px, transparent 1px);
+    background-size: 6px 6px;
+
+    .TZStrip:hover & {
+      opacity: 1;
+    }
+
+    @include utils.narrow {
+      opacity: 1;
+      width: 8px;
+      height: 16px;
+      background-size: 4px 4px;
     }
   }
 

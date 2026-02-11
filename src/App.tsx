@@ -7,6 +7,8 @@ import { useTime } from './TimeContext'
 import AddTZ from './AddTZ'
 import { easeInOutCubic } from './ease'
 import { useSettings } from './SettingsContext'
+import { TopBar } from './TopBar'
+import { numberToPaddedString } from './utils'
 
 
 function App() {
@@ -157,32 +159,61 @@ function App() {
     )
   }
 
+  const navigateToDate = useCallback((date: string) => {
+    if (!date) return;
+
+    const [year, month, day] = date.split("-").map(Number);
+    const startOfDayUtc = Temporal.ZonedDateTime.from({
+      timeZone: "UTC",
+      year,
+      month,
+      day,
+      hour: 0,
+      minute: 0,
+      second: 0,
+      millisecond: 0,
+    }).toInstant().epochMilliseconds;
+
+    setFocusTime(snapTime(startOfDayUtc));
+  }, [snapTime]);
+
+  const navDateTime = Temporal.Instant
+    .fromEpochMilliseconds(Math.round(focusTime || currentTime))
+    .toZonedDateTimeISO("UTC");
+  const selectedDate = `${navDateTime.year}-${numberToPaddedString(navDateTime.month)}-${numberToPaddedString(navDateTime.day)}`;
+
   return (
-    <div
-      className="App__wrapper"
-    >
-      {tzs.map(
-        (e, i) => <TZStrip
-          isDirty={!!focusTime}
-          tz={e}
-          referenceTZ={tzs[0]}
-          key={i}
-          only={tzs.length === 1}
-          onReset={animateFocusTimeBack}
-          onRemove={() => setTzs(tzs.filter((t) => t !== e))}
-          focusTime={focusTime || currentTime}
-          onWheelX={handleWheelX}
-          onDragStart={(pos) => {
-            isDraggingRef.current = true;
-            mousePosRef.current = pos;
-            dragStartPosRef.current = pos[0]; // Store initial X position
-            dragStartTimeRef.current = focusTime || currentTime; // Store initial time
-            if (!focusTime) setFocusTime(currentTime);
-          }}
-        />
-      )}
-      <AddTZ onAdd={handleAddTz} currentTzs={tzs} />
-    </div>
+    <>
+      <TopBar
+        selectedDate={selectedDate}
+        onNavigateToDate={navigateToDate}
+      />
+      <div
+        className="App__wrapper"
+      >
+        {tzs.map(
+          (e, i) => <TZStrip
+            isDirty={!!focusTime}
+            tz={e}
+            referenceTZ={tzs[0]}
+            key={i}
+            only={tzs.length === 1}
+            onReset={animateFocusTimeBack}
+            onRemove={() => setTzs(tzs.filter((t) => t !== e))}
+            focusTime={focusTime || currentTime}
+            onWheelX={handleWheelX}
+            onDragStart={(pos) => {
+              isDraggingRef.current = true;
+              mousePosRef.current = pos;
+              dragStartPosRef.current = pos[0]; // Store initial X position
+              dragStartTimeRef.current = focusTime || currentTime; // Store initial time
+              if (!focusTime) setFocusTime(currentTime);
+            }}
+          />
+        )}
+        <AddTZ onAdd={handleAddTz} currentTzs={tzs} />
+      </div>
+    </>
   )
 }
 

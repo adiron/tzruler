@@ -43,7 +43,7 @@ export const TIMEZONE_ALIASES: [string[], string[]][] = [
   [["SGT"], ["Asia/Singapore"]],
   [["HKT"], ["Asia/Hong_Kong"]],
   [["KST"], ["Asia/Seoul"]],
-  [["IST"], ["Asia/Kolkata", "Asia/Colombo"]]
+  [["IST", "India", "Bangalore", "Bangaluru", "Mumbai", "New Delhi", "Delhi", "Calcutta", "Kolkata", "Chennai"], ["Asia/Kolkata", "Asia/Calcutta"]]
 ];
 
 /**

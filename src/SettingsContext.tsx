@@ -6,7 +6,7 @@ export interface TZRulerSettings {
   hourSize: number;
   hourDivisions: number;
   aheadBehind: boolean;
-  snapTo?: number;
+  snapTo: number | null;
 }
 
 type TZRulerSettingsContextValue = [

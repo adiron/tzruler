@@ -53,9 +53,9 @@ export default function SettingsMenu() {
       </div>
       <div className="SettingsMenu__item">
         <span>Snapping</span>
-        <RadioButtons<number | undefined>
+        <RadioButtons<number | null>
           options={[
-            { value: undefined, label: "No snapping" },
+            { value: null, label: "No snapping" },
             { value: 15, label: "15 minutes (default)" },
             { value: 30, label: "30 minutes" },
             { value: 60, label: "1 hour" },

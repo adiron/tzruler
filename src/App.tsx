@@ -12,6 +12,7 @@ import { numberToPaddedString } from './utils'
 
 
 function App() {
+  const TOUCH_AXIS_LOCK_THRESHOLD = 8;
   const [{ hourSize, snapTo }] = useSettings();
   const [tzs, setTzs] = useState<string[]>([])
   const [focusTime, setFocusTime] = useState<number | null>();
@@ -62,6 +63,10 @@ function App() {
   const mousePosRef = useRef<[number, number] | null>(null);
   const dragStartTimeRef = useRef<number | null>(null); // Store time when drag starts
   const dragStartPosRef = useRef<number | null>(null); // Store mouse X position when drag starts
+  const dragPointerTypeRef = useRef<'mouse' | 'touch' | null>(null);
+  const touchModeRef = useRef<'pending' | 'page' | 'strip' | null>(null);
+  const touchStartRef = useRef<[number, number] | null>(null);
+  const touchStartTimeRef = useRef<number | null>(null);
 
   const animateFocusTimeBack = () => {
     if (focusTime == null) return;
@@ -107,6 +112,13 @@ function App() {
   }, [tzs])
 
   useEffect(() => {
+    const beginDrag = (startPos: [number, number], startTime: number) => {
+      isDraggingRef.current = true;
+      dragStartPosRef.current = startPos[0];
+      dragStartTimeRef.current = startTime;
+      mousePosRef.current = startPos;
+      if (!focusTime) setFocusTime(currentTime);
+    };
 
     const handleChange = (currentX: number) => {
       if (dragStartPosRef.current === null || dragStartTimeRef.current === null) return;
@@ -126,7 +138,46 @@ function App() {
     };
 
     const touch = (e: TouchEvent) => {
-      if (!isDraggingRef.current) return;
+      if (dragPointerTypeRef.current !== 'touch') return;
+      if (e.touches.length === 0) return;
+      const touchPoint = e.touches[0];
+
+      if (touchModeRef.current === 'pending' && touchStartRef.current !== null) {
+        const [startX, startY] = touchStartRef.current;
+        const dx = touchPoint.clientX - startX;
+        const dy = touchPoint.clientY - startY;
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        if (
+          absDx < TOUCH_AXIS_LOCK_THRESHOLD &&
+          absDy < TOUCH_AXIS_LOCK_THRESHOLD
+        ) {
+          return;
+        }
+
+        if (absDx > absDy) {
+          touchModeRef.current = 'strip';
+        } else {
+          touchModeRef.current = 'page';
+        }
+
+        if (touchModeRef.current === 'page') {
+          isDraggingRef.current = false;
+          dragStartPosRef.current = null;
+          dragStartTimeRef.current = null;
+          dragPointerTypeRef.current = null;
+          touchStartRef.current = null;
+          touchStartTimeRef.current = null;
+          return;
+        }
+
+        if (touchStartTimeRef.current !== null) {
+          beginDrag([startX, startY], touchStartTimeRef.current);
+        }
+      }
+
+      if (touchModeRef.current !== 'strip' || !isDraggingRef.current) return;
+      e.preventDefault();
       handleChange(e.touches[0].clientX);
       mousePosRef.current = [e.touches[0].clientX, e.touches[0].clientY];
     };
@@ -136,22 +187,26 @@ function App() {
       isDraggingRef.current = false;
       dragStartPosRef.current = null;
       dragStartTimeRef.current = null;
+      dragPointerTypeRef.current = null;
+      touchModeRef.current = null;
+      touchStartRef.current = null;
+      touchStartTimeRef.current = null;
     }
 
     window.addEventListener("mousemove", mouse);
     window.addEventListener("mouseup", end);
-    window.addEventListener("touchmove", touch);
-    window.addEventListener("touchstart", touch);
+    window.addEventListener("touchmove", touch, { passive: false });
     window.addEventListener("touchend", end);
+    window.addEventListener("touchcancel", end);
 
     return () => {
       window.removeEventListener("mousemove", mouse);
       window.removeEventListener("mouseup", end);
       window.removeEventListener("touchmove", touch);
-      window.removeEventListener("touchstart", touch);
       window.removeEventListener("touchend", end);
+      window.removeEventListener("touchcancel", end);
     }
-  }, [msPerPixel, snapTime]);
+  }, [currentTime, focusTime, msPerPixel, snapTime]);
 
   const handleAddTz = useCallback((tz: string) => {
     setTzs((tzs) => [...tzs, tz])
@@ -304,12 +359,25 @@ function App() {
             focusTime={focusTime || currentTime}
             onWheelX={handleWheelX}
             onReorderDragStart={(pos) => startReorderDrag(i, pos[1])}
-            onDragStart={(pos) => {
-              isDraggingRef.current = true;
-              mousePosRef.current = pos;
-              dragStartPosRef.current = pos[0]; // Store initial X position
-              dragStartTimeRef.current = focusTime || currentTime; // Store initial time
-              if (!focusTime) setFocusTime(currentTime);
+            onDragStart={(pos, pointerType) => {
+              const startTime = focusTime || currentTime;
+              dragPointerTypeRef.current = pointerType;
+
+              if (pointerType === 'mouse') {
+                isDraggingRef.current = true;
+                mousePosRef.current = pos;
+                dragStartPosRef.current = pos[0];
+                dragStartTimeRef.current = startTime;
+                if (!focusTime) setFocusTime(currentTime);
+                return;
+              }
+
+              touchModeRef.current = 'pending';
+              touchStartRef.current = pos;
+              touchStartTimeRef.current = startTime;
+              isDraggingRef.current = false;
+              dragStartPosRef.current = null;
+              dragStartTimeRef.current = null;
             }}
           />
         )}

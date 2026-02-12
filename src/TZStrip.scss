@@ -136,6 +136,7 @@
   &__ruler {
     position: relative;
     cursor: ew-resize;
+    touch-action: pan-y;
 
     &:hover .TZStrip__focusTimeReset {
       opacity: 1;

@@ -21,7 +21,7 @@ export interface TZStripParams {
   referenceTZ: string;
   onRemove: () => void;
   onWheelX: (arg0: number) => void;
-  onDragStart: (arg0: [number, number]) => void;
+  onDragStart: (arg0: [number, number], arg1: 'mouse' | 'touch') => void;
   onReorderDragStart: (arg0: [number, number]) => void;
   onReset: () => void;
   focusTime: number;
@@ -197,8 +197,8 @@ export default function TZStrip(
     <div
       className="TZStrip__ruler"
       ref={rulerRef}
-      onMouseDown={(e) => onDragStart([e.clientX, e.clientY])}
-      onTouchStart={(e) => onDragStart([e.touches[0].clientX, e.touches[0].clientY])}
+      onMouseDown={(e) => onDragStart([e.clientX, e.clientY], 'mouse')}
+      onTouchStart={(e) => onDragStart([e.touches[0].clientX, e.touches[0].clientY], 'touch')}
     >
       {/* The bar with all the ticks */}
       <div

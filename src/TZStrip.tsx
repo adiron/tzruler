@@ -73,8 +73,15 @@ export default function TZStrip(
   const [{ hourSize, aheadBehind }] = useSettings();
   const currentTime = useTime();
   const zonedCurrentTime = Temporal.Instant.fromEpochMilliseconds(currentTime).toZonedDateTimeISO(tz);
-  const zonedFocusTime = Temporal.Instant.fromEpochMilliseconds(Math.round(focusTime)).toZonedDateTimeISO(tz);
-  const referenceZoneTime = Temporal.Instant.fromEpochMilliseconds(Math.round(focusTime)).toZonedDateTimeISO(referenceTZ);
+  const roundedFocusTime = Math.round(focusTime);
+  const zonedFocusTime = useMemo(
+    () => Temporal.Instant.fromEpochMilliseconds(roundedFocusTime).toZonedDateTimeISO(tz),
+    [roundedFocusTime, tz]
+  );
+  const referenceZoneTime = useMemo(
+    () => Temporal.Instant.fromEpochMilliseconds(roundedFocusTime).toZonedDateTimeISO(referenceTZ),
+    [roundedFocusTime, referenceTZ]
+  );
   // The TZ offset in hours as fractions (e.g. -8.0, +4.5 etc.)
   const offsetHours = zonedFocusTime.offsetNanoseconds / 1e+9 / 60 / 60;
 
@@ -86,25 +93,34 @@ export default function TZStrip(
   // Raw time in the view, in hours.
   const hoursInView = useMemo(() => rulerWidth / hourSize, [rulerWidth, hourSize]);
 
-  // Helper to calculate overflow timestamps
-  const getOverflowTimestamp = (baseTime: number, hourOffset: number) =>
+  // Keep temporal conversions memoized to avoid recomputing the full strip model on every clock tick.
+  const getOverflowTimestamp = useCallback((baseTime: number, hourOffset: number) =>
     Temporal.Instant
       .fromEpochMilliseconds(Math.round(baseTime))
       .toZonedDateTimeISO(tz)
       .with({ minute: 0, second: 0, millisecond: 0 })
       .add({ hours: hourOffset })
       .toInstant()
-      .epochMilliseconds;
+      .epochMilliseconds
+  , [tz]);
 
-  // The leftmost timestamp in epoch time in THE VIEW
-  // TODO - fix this code so that it will work for LINE_POSITION != 0.5
-  const leftTimeStamp = Math.round(focusTime) - (hoursInView / 2) * 60 * 60 * 1000;
-  const leftTimeStampOverflow = getOverflowTimestamp(leftTimeStamp, -2); // -2 on purpose
-
-  // The rightmost timestamp in epoch time in THE VIEW
-  // TODO - fix this code so that it will work for LINE_POSITION != 0.5
-  const rightTimeStamp = Math.round(focusTime) + (hoursInView / 2) * 60 * 60 * 1000;
-  const rightTimeStampOverflow = getOverflowTimestamp(rightTimeStamp, 1);
+  const {
+    leftTimeStamp,
+    rightTimeStamp,
+    leftTimeStampOverflow,
+    rightTimeStampOverflow,
+  } = useMemo(() => {
+    // The leftmost timestamp in epoch time in THE VIEW
+    // TODO - fix this code so that it will work for LINE_POSITION != 0.5
+    const left = roundedFocusTime - (hoursInView / 2) * 60 * 60 * 1000;
+    const right = roundedFocusTime + (hoursInView / 2) * 60 * 60 * 1000;
+    return {
+      leftTimeStamp: left,
+      rightTimeStamp: right,
+      leftTimeStampOverflow: getOverflowTimestamp(left, -2), // -2 on purpose
+      rightTimeStampOverflow: getOverflowTimestamp(right, 1),
+    };
+  }, [roundedFocusTime, hoursInView, getOverflowTimestamp]);
 
 
   const hourMarks = useMemo(

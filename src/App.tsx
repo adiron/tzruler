@@ -13,6 +13,7 @@ import { numberToPaddedString } from './utils'
 
 function App() {
   const TOUCH_AXIS_LOCK_THRESHOLD = 8;
+  const STRIP_TIME_GRANULARITY_MS = 60 * 1000;
   const [{ hourSize, snapTo }] = useSettings();
   const [tzs, setTzs] = useState<string[]>([])
   const [focusTime, setFocusTime] = useState<number | null>();
@@ -26,7 +27,7 @@ function App() {
   // Utility function to snap timestamp to specified minute intervals
   // Checks ALL displayed timezones and snaps to nearest point where ANY timezone shows a round time
   const snapTime = useCallback((timestamp: number): number => {
-    if (!snapTo || snapTo === 0 || tzs.length === 0) return timestamp;
+    if (snapTo == null || snapTo === 0 || tzs.length === 0) return timestamp;
 
     // Calculate snap candidates from all timezones
     const candidates = tzs.flatMap(tz => {
@@ -58,6 +59,10 @@ function App() {
   }, [snapTo, tzs]);
 
   const currentTime = useTime();
+  const currentTimeRef = useRef(currentTime);
+  const focusTimeRef = useRef<number | null>(null);
+  const msPerPixelRef = useRef(msPerPixel);
+  const snapTimeRef = useRef(snapTime);
 
   const isDraggingRef = useRef(false);
   const mousePosRef = useRef<[number, number] | null>(null);
@@ -68,12 +73,29 @@ function App() {
   const touchStartRef = useRef<[number, number] | null>(null);
   const touchStartTimeRef = useRef<number | null>(null);
 
-  const animateFocusTimeBack = () => {
-    if (focusTime == null) return;
+  useEffect(() => {
+    // Keep fast-moving drag inputs in refs so global pointer listeners can stay attached once.
+    currentTimeRef.current = currentTime;
+  }, [currentTime]);
+
+  useEffect(() => {
+    focusTimeRef.current = focusTime ?? null;
+  }, [focusTime]);
+
+  useEffect(() => {
+    msPerPixelRef.current = msPerPixel;
+  }, [msPerPixel]);
+
+  useEffect(() => {
+    snapTimeRef.current = snapTime;
+  }, [snapTime]);
+
+  const animateFocusTimeBack = useCallback(() => {
+    const from = focusTimeRef.current;
+    if (from == null) return;
 
     const start = performance.now();
-    const from = focusTime;
-    const to = currentTime;
+    const to = currentTimeRef.current;
 
     const step = (now: number) => {
       const t = Math.min((now - start) / SNAP_BACK_DURATION, 1);
@@ -90,7 +112,7 @@ function App() {
     };
 
     requestAnimationFrame(step);
-  };
+  }, []);
 
   useLayoutEffect(() => {
     if (tzs.length === 0) {
@@ -112,12 +134,13 @@ function App() {
   }, [tzs])
 
   useEffect(() => {
+    // Intentionally one-time listener registration; handlers read latest values from refs above.
     const beginDrag = (startPos: [number, number], startTime: number) => {
       isDraggingRef.current = true;
       dragStartPosRef.current = startPos[0];
       dragStartTimeRef.current = startTime;
       mousePosRef.current = startPos;
-      if (!focusTime) setFocusTime(currentTime);
+      if (!focusTimeRef.current) setFocusTime(currentTimeRef.current);
     };
 
     const handleChange = (currentX: number) => {
@@ -125,10 +148,10 @@ function App() {
 
       // Calculate offset from where the drag started
       const pixelOffset = dragStartPosRef.current - currentX;
-      const newTime = dragStartTimeRef.current + (pixelOffset * msPerPixel);
+      const newTime = dragStartTimeRef.current + (pixelOffset * msPerPixelRef.current);
 
       // Apply snapping to the final calculated time
-      setFocusTime(snapTime(Math.round(newTime)));
+      setFocusTime(snapTimeRef.current(Math.round(newTime)));
     }
 
     const mouse = (e: MouseEvent) => {
@@ -206,7 +229,7 @@ function App() {
       window.removeEventListener("touchend", end);
       window.removeEventListener("touchcancel", end);
     }
-  }, [currentTime, focusTime, msPerPixel, snapTime]);
+  }, []);
 
   const handleAddTz = useCallback((tz: string) => {
     setTzs((tzs) => [...tzs, tz])
@@ -301,11 +324,39 @@ function App() {
     };
   }, [finishReorderDrag, reorderDraggedIndex, updateReorderLine]);
 
-  function handleWheelX(e: number) {
+  const handleWheelX = useCallback((e: number) => {
+    const baseTime = focusTimeRef.current || currentTimeRef.current;
     setFocusTime(
-      snapTime(Math.round((focusTime || currentTime) + (e * msPerPixel)))
+      snapTimeRef.current(Math.round(baseTime + (e * msPerPixelRef.current)))
     )
-  }
+  }, []);
+
+  const handleStripDragStart = useCallback((pos: [number, number], pointerType: 'mouse' | 'touch') => {
+    const startTime = focusTimeRef.current || currentTimeRef.current;
+    dragPointerTypeRef.current = pointerType;
+
+    if (pointerType === 'mouse') {
+      isDraggingRef.current = true;
+      mousePosRef.current = pos;
+      dragStartPosRef.current = pos[0];
+      dragStartTimeRef.current = startTime;
+      if (!focusTimeRef.current) setFocusTime(currentTimeRef.current);
+      return;
+    }
+
+    touchModeRef.current = 'pending';
+    touchStartRef.current = pos;
+    touchStartTimeRef.current = startTime;
+    isDraggingRef.current = false;
+    dragStartPosRef.current = null;
+    dragStartTimeRef.current = null;
+  }, []);
+
+  const handleRemoveTz = useCallback((tz: string) => {
+    setTzs((prev) => prev.filter((t) => t !== tz));
+  }, []);
+
+  const stripFocusTime = focusTime ?? Math.round(currentTime / STRIP_TIME_GRANULARITY_MS) * STRIP_TIME_GRANULARITY_MS;
 
   const navigateToDate = useCallback((date: string) => {
     if (!date) return;
@@ -355,30 +406,11 @@ function App() {
             only={tzs.length === 1}
             isReorderDragging={reorderDraggedIndex === i}
             onReset={animateFocusTimeBack}
-            onRemove={() => setTzs(tzs.filter((t) => t !== e))}
-            focusTime={focusTime || currentTime}
+            onRemove={() => handleRemoveTz(e)}
+            focusTime={stripFocusTime}
             onWheelX={handleWheelX}
             onReorderDragStart={(pos) => startReorderDrag(i, pos[1])}
-            onDragStart={(pos, pointerType) => {
-              const startTime = focusTime || currentTime;
-              dragPointerTypeRef.current = pointerType;
-
-              if (pointerType === 'mouse') {
-                isDraggingRef.current = true;
-                mousePosRef.current = pos;
-                dragStartPosRef.current = pos[0];
-                dragStartTimeRef.current = startTime;
-                if (!focusTime) setFocusTime(currentTime);
-                return;
-              }
-
-              touchModeRef.current = 'pending';
-              touchStartRef.current = pos;
-              touchStartTimeRef.current = startTime;
-              isDraggingRef.current = false;
-              dragStartPosRef.current = null;
-              dragStartTimeRef.current = null;
-            }}
+            onDragStart={handleStripDragStart}
           />
         )}
         <AddTZ onAdd={handleAddTz} currentTzs={tzs} />

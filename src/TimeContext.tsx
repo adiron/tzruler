@@ -1,5 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { TICK_INTERVAL_MS } from "./constants";
 
 const TimeContext = createContext<number | null>(null);
 
@@ -7,7 +8,7 @@ export function TimeProvider({ children }: { children: ReactNode }) {
   const [time, setTime] = useState<number>(Date.now());
 
   useEffect(() => {
-    const id = setInterval(() => setTime(Date.now()), 500);
+    const id = setInterval(() => setTime(Date.now()), TICK_INTERVAL_MS);
     return () => clearInterval(id);
   }, []);
 

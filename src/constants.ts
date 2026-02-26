@@ -10,6 +10,24 @@ export const OVERLAP_HIDE_THRESHOLD = 100;
 
 export const SNAP_BACK_DURATION = 250;
 
+/** Nanoseconds per second, for converting Temporal nanosecond offsets */
+export const NANOS_PER_SECOND = 1_000_000_000;
+
+/** localStorage key for the saved timezone list */
+export const LS_KEY_TZS = "tzs";
+
+/** Clock tick interval in milliseconds */
+export const TICK_INTERVAL_MS = 500;
+
+/** Hours to extend the left edge of the render window past the visible area */
+export const OVERFLOW_HOURS_LEFT = 2;
+
+/** Hours to extend the right edge of the render window past the visible area */
+export const OVERFLOW_HOURS_RIGHT = 1;
+
+/** Touch gesture axis-lock state */
+export type TouchMode = 'pending' | 'page' | 'strip' | null;
+
 export const DEFAULT_SETTINGS: TZRulerSettings = {
   /** Width of a single hour in pixels **/
   hourSize: 80,
@@ -46,21 +64,14 @@ export const TIMEZONE_ALIASES: [string[], string[]][] = [
   [["IST", "India", "Bangalore", "Bangaluru", "Mumbai", "New Delhi", "Delhi", "Calcutta", "Kolkata", "Chennai"], ["Asia/Kolkata", "Asia/Calcutta"]]
 ];
 
-/**
- * Returns a map of timezone -> aliases[]
- * Only includes timezones that are present in the provided allTimezones list.
- */
-export function getAliasesByTimezone(): Record<string, string[]> {
+function buildAliasMap(): Record<string, string[]> {
   const aliasesByTz: Record<string, string[]> = {};
 
   TIMEZONE_ALIASES.forEach(([aliases, timezones]) => {
     timezones.forEach(tz => {
-      // We populate all aliases. If the timezone doesn't exist on the system, 
-      // it simply won't be queried by the UI which iterates over availableTzs.
       if (!aliasesByTz[tz]) {
         aliasesByTz[tz] = [];
       }
-      // Add unique aliases
       aliases.forEach(alias => {
         if (!aliasesByTz[tz].includes(alias)) {
           aliasesByTz[tz].push(alias);
@@ -71,3 +82,6 @@ export function getAliasesByTimezone(): Record<string, string[]> {
 
   return aliasesByTz;
 }
+
+/** Pre-computed map of timezone -> aliases[], built once at module load time */
+export const ALIASES_BY_TIMEZONE: Record<string, string[]> = buildAliasMap();

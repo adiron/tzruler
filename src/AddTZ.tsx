@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ALL_TIMEZONES, getAliasesByTimezone } from "./constants";
+import { ALL_TIMEZONES, ALIASES_BY_TIMEZONE, NANOS_PER_SECOND } from "./constants";
 import { formatTzName, formatTzOffset } from "./utils";
 import { Temporal } from "temporal-polyfill";
 import "./AddTZ.scss";
@@ -14,10 +14,7 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
   const [filter, setFilter] = useState<string>('');
   const input = useRef<HTMLInputElement>(null);
 
-  const aliasesByTz = useMemo(() => {
-    const result = getAliasesByTimezone();
-    return result;
-  }, []);
+  const aliasesByTz = ALIASES_BY_TIMEZONE;
 
   // This array is formmated as [offset: number, name: string]
   const availableTzs = useMemo<[number, string][]>(() => {
@@ -26,7 +23,7 @@ export default function AddTZ({ currentTzs, onAdd }: AddTZParams) {
       .filter(e => !currentTzs.includes(e))
       .map<[number, string]>(tz => {
         const zonedTime = Temporal.Instant.fromEpochMilliseconds(now).toZonedDateTimeISO(tz);
-        return [zonedTime.offsetNanoseconds / 1e9 / 60 / 60, tz];
+        return [zonedTime.offsetNanoseconds / NANOS_PER_SECOND / 60 / 60, tz];
       })
       .sort((a, b) => a[0] - b[0])
   }, [currentTzs]

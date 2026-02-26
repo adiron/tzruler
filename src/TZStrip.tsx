@@ -14,7 +14,7 @@ import { StripHour } from './StripHour';
 import { useTime } from './TimeContext';
 import './TZStrip.scss'
 import { useSettings } from './SettingsContext';
-import { OVERLAP_HIDE_THRESHOLD } from './constants';
+import { OVERLAP_HIDE_THRESHOLD, NANOS_PER_SECOND, OVERFLOW_HOURS_LEFT, OVERFLOW_HOURS_RIGHT } from './constants';
 
 export interface TZStripParams {
   tz: string;
@@ -42,7 +42,7 @@ function findDSTTransitions(leftMs: number, rightMs: number, tz: string) {
     if (transitionMs > rightMs) break;
 
     const justBefore = Temporal.Instant.fromEpochMilliseconds(transitionMs - 1).toZonedDateTimeISO(tz);
-    const offsetChangeSecs = (next.offsetNanoseconds - justBefore.offsetNanoseconds) / 1e9;
+    const offsetChangeSecs = (next.offsetNanoseconds - justBefore.offsetNanoseconds) / NANOS_PER_SECOND;
 
     transitions.push({ epochMs: transitionMs, offsetChangeSecs });
     current = next;
@@ -101,7 +101,10 @@ export default function TZStrip(
   }: TZStripParams) {
   const [{ hourSize, aheadBehind }] = useSettings();
   const currentTime = useTime();
-  const zonedCurrentTime = Temporal.Instant.fromEpochMilliseconds(currentTime).toZonedDateTimeISO(tz);
+  const zonedCurrentTime = useMemo(
+    () => Temporal.Instant.fromEpochMilliseconds(currentTime).toZonedDateTimeISO(tz),
+    [currentTime, tz]
+  );
   const roundedFocusTime = Math.round(focusTime);
   const zonedFocusTime = useMemo(
     () => Temporal.Instant.fromEpochMilliseconds(roundedFocusTime).toZonedDateTimeISO(tz),
@@ -112,7 +115,7 @@ export default function TZStrip(
     [roundedFocusTime, referenceTZ]
   );
   // The TZ offset in hours as fractions (e.g. -8.0, +4.5 etc.)
-  const offsetHours = zonedFocusTime.offsetNanoseconds / 1e+9 / 60 / 60;
+  const offsetHours = zonedFocusTime.offsetNanoseconds / NANOS_PER_SECOND / 60 / 60;
 
   const rulerRef = useRef<HTMLDivElement>(null);
   const [rulerWidth, setRulerWidth] = useState(0);
@@ -146,8 +149,8 @@ export default function TZStrip(
     return {
       leftTimeStamp: left,
       rightTimeStamp: right,
-      leftTimeStampOverflow: getOverflowTimestamp(left, -2), // -2 on purpose
-      rightTimeStampOverflow: getOverflowTimestamp(right, 1),
+      leftTimeStampOverflow: getOverflowTimestamp(left, -OVERFLOW_HOURS_LEFT),
+      rightTimeStampOverflow: getOverflowTimestamp(right, OVERFLOW_HOURS_RIGHT),
     };
   }, [roundedFocusTime, hoursInView, getOverflowTimestamp]);
 
@@ -169,7 +172,7 @@ export default function TZStrip(
   }, [leftTimeStamp, rightTimeStamp, rulerWidth]);
 
   const renderAheadBehind = useCallback(() => {
-    const length = hourSize * ((zonedFocusTime.offsetNanoseconds - referenceZoneTime.offsetNanoseconds) / 1e9 / 60 / 60);
+    const length = hourSize * ((zonedFocusTime.offsetNanoseconds - referenceZoneTime.offsetNanoseconds) / NANOS_PER_SECOND / 60 / 60);
     const ahead = length > 0;
 
     return <div

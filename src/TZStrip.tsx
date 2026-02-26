@@ -30,6 +30,35 @@ export interface TZStripParams {
   isReorderDragging: boolean;
 }
 
+function findDSTTransitions(leftMs: number, rightMs: number, tz: string) {
+  const transitions: Array<{ epochMs: number; offsetChangeSecs: number }> = [];
+  let current = Temporal.Instant.fromEpochMilliseconds(leftMs).toZonedDateTimeISO(tz);
+
+  while (true) {
+    const next = current.getTimeZoneTransition('next');
+    if (next === null) break;
+
+    const transitionMs = next.toInstant().epochMilliseconds;
+    if (transitionMs > rightMs) break;
+
+    const justBefore = Temporal.Instant.fromEpochMilliseconds(transitionMs - 1).toZonedDateTimeISO(tz);
+    const offsetChangeSecs = (next.offsetNanoseconds - justBefore.offsetNanoseconds) / 1e9;
+
+    transitions.push({ epochMs: transitionMs, offsetChangeSecs });
+    current = next;
+  }
+
+  return transitions;
+}
+
+function formatDSTChange(changeSecs: number): string {
+  const sign = changeSecs > 0 ? '+' : '\u2212';
+  const absSecs = Math.abs(changeSecs);
+  const hours = absSecs / 3600;
+  if (Number.isInteger(hours)) return `${sign}${hours}h`;
+  return `${sign}${Math.round(absSecs / 60)}m`;
+}
+
 function generateMarks(left: number, right: number, tz: string) {
   const hours = [];
   const currentYear = Temporal.Now.zonedDateTimeISO(tz).year;
@@ -125,6 +154,11 @@ export default function TZStrip(
 
   const hourMarks = useMemo(
     () => generateMarks(leftTimeStampOverflow, rightTimeStampOverflow, tz),
+    [leftTimeStampOverflow, rightTimeStampOverflow, tz]
+  );
+
+  const dstTransitions = useMemo(
+    () => findDSTTransitions(leftTimeStampOverflow, rightTimeStampOverflow, tz),
     [leftTimeStampOverflow, rightTimeStampOverflow, tz]
   );
 
@@ -248,6 +282,18 @@ export default function TZStrip(
           </button>
         </div>
       </div>
+
+      {dstTransitions.map((t) => (
+        <div
+          key={t.epochMs}
+          className="TZStrip__dstBar"
+          style={{ left: `${epochToPixels(t.epochMs)}px` }}
+        >
+          <div className="TZStrip__dstText">
+            {formatDSTChange(t.offsetChangeSecs)}
+          </div>
+        </div>
+      ))}
 
       {hourMarks.map((m) => <StripHour
         key={m.time}

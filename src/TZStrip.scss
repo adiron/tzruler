@@ -161,6 +161,11 @@
     padding-top: 16px;
     display: inline-block;
     color: var(--color-dst);
+    transition: 100ms linear opacity 10ms;
+
+    &--hidden {
+      opacity: 0;
+    }
   }
 
   &__currentTimeBar {

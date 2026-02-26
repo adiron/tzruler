@@ -286,17 +286,22 @@ export default function TZStrip(
         </div>
       </div>
 
-      {dstTransitions.map((t) => (
-        <div
-          key={t.epochMs}
-          className="TZStrip__dstBar"
-          style={{ left: `${epochToPixels(t.epochMs)}px` }}
-        >
-          <div className="TZStrip__dstText">
-            {formatDSTChange(t.offsetChangeSecs)}
+      {dstTransitions.map((t) => {
+        const dstPx = epochToPixels(t.epochMs);
+        const nearCurrentTime = Math.abs(dstPx - epochToPixels(currentTime)) < OVERLAP_HIDE_THRESHOLD;
+        const nearFocusTime = isDirty && Math.abs(dstPx - epochToPixels(focusTime)) < OVERLAP_HIDE_THRESHOLD;
+        return (
+          <div
+            key={t.epochMs}
+            className="TZStrip__dstBar"
+            style={{ left: `${dstPx}px` }}
+          >
+            <div className={`TZStrip__dstText${nearCurrentTime || nearFocusTime ? ' TZStrip__dstText--hidden' : ''}`}>
+              {formatDSTChange(t.offsetChangeSecs)}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
 
       {hourMarks.map((m) => <StripHour
         key={m.time}

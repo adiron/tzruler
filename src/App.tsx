@@ -11,13 +11,14 @@ import { TopBar } from './TopBar'
 import { numberToPaddedString } from './utils'
 import { useTimeDrag } from './useTimeDrag'
 import { useReorderDrag } from './useReorderDrag'
+import { useInactivityReset } from './useInactivityReset'
 
 const STRIP_TIME_GRANULARITY_MS = 60 * 1000;
 
 function App() {
-  const [{ hourSize, snapTo }] = useSettings();
+  const [{ hourSize, snapTo, autoReset }] = useSettings();
   const [tzs, setTzs] = useState<string[]>([])
-  const [focusTime, setFocusTime] = useState<number | null>();
+  const [focusTime, setFocusTime] = useState<number | null>(null);
 
   const msPerPixel = (60 * 60 * 1000) / hourSize;
 
@@ -78,12 +79,6 @@ function App() {
     snapTimeRef.current = snapTime;
   }, [snapTime]);
 
-  const { handleStripDragStart } = useTimeDrag(
-    currentTimeRef, focusTimeRef, msPerPixelRef, snapTimeRef, setFocusTime
-  );
-
-  const { reorderDraggedIndex, reorderLineTop, handleReorderStart, wrapperRef } = useReorderDrag(setTzs);
-
   const animateFocusTimeBack = useCallback(() => {
     const from = focusTimeRef.current;
     if (from == null) return;
@@ -108,6 +103,14 @@ function App() {
     requestAnimationFrame(step);
   }, []);
 
+  const reportActivity = useInactivityReset(focusTime, autoReset, animateFocusTimeBack);
+
+  const { handleStripDragStart } = useTimeDrag(
+    currentTimeRef, focusTimeRef, msPerPixelRef, snapTimeRef, setFocusTime
+  );
+
+  const { reorderDraggedIndex, reorderLineTop, handleReorderStart, wrapperRef } = useReorderDrag(setTzs);
+
   useLayoutEffect(() => {
     if (tzs.length === 0) {
       const storage = localStorage.getItem(LS_KEY_TZS);
@@ -126,6 +129,13 @@ function App() {
     localStorage.setItem(LS_KEY_TZS, JSON.stringify(tzs));
 
   }, [tzs])
+
+  // Any change to the timezone list counts as user activity.
+  // focusTimeRef is intentionally read via ref to avoid triggering on every drag frame.
+  // reportActivity is a stable useCallback so omitting it from deps is safe.
+  useEffect(() => {
+    if (focusTimeRef.current != null) reportActivity();
+  }, [tzs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAddTz = useCallback((tz: string) => {
     setTzs((tzs) => [...tzs, tz])

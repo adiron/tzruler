@@ -7,6 +7,8 @@ export interface TZRulerSettings {
   hourDivisions: number;
   aheadBehind: boolean;
   snapTo: number | null;
+  /** Auto-reset timeout in seconds. 0 = never. */
+  autoReset: number;
 }
 
 type TZRulerSettingsContextValue = [
@@ -17,7 +19,6 @@ type TZRulerSettingsContextValue = [
 const SettingsContext = createContext<TZRulerSettingsContextValue | undefined>(undefined);
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
-  // Load settings from localStorage with migration
   const loadSettings = (): TZRulerSettings => {
     try {
       const stored = localStorage.getItem('settings');
@@ -33,7 +34,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const [settings, setSettingsInternal] = useState<TZRulerSettings>(loadSettings);
 
-  // Persist settings to localStorage whenever they change
   const setSettings: React.Dispatch<React.SetStateAction<TZRulerSettings>> = (value) => {
     setSettingsInternal((prev) => {
       const newSettings = typeof value === 'function' ? value(prev) : value;

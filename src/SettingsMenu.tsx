@@ -75,6 +75,19 @@ export default function SettingsMenu() {
           Show Ahead/Behind Range
         </label>
       </div>
+      <div className="SettingsMenu__item">
+        <span>Auto-reset after inactivity</span>
+        <RadioButtons<number>
+          options={[
+            { value: 300, label: '5 minutes' },
+            { value: 900, label: '15 minutes (default)' },
+            { value: 3600, label: '1 hour' },
+            { value: 0, label: 'Never' },
+          ]}
+          value={settings.autoReset}
+          onChange={v => setSettings(s => ({ ...s, autoReset: v }))}
+        />
+      </div>
     </div>
   </div>
 }

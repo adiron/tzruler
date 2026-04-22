@@ -37,8 +37,9 @@ export const DEFAULT_SETTINGS: TZRulerSettings = {
   aheadBehind: false,
   /** Snap-to interval in minutes (15 = snap to :00, :15, :30, :45) **/
   snapTo: 15,
+  /** Auto-reset timeout in seconds. 0 = never. **/
+  autoReset: 900,
 };
-
 
 export const TIMEZONE_ALIASES: [string[], string[]][] = [
   [["CET", "CEST"], ["Europe/Paris", "Europe/Berlin", "Europe/Madrid", "Europe/Rome", "Europe/Amsterdam", "Europe/Brussels", "Europe/Vienna", "Europe/Warsaw", "Europe/Stockholm", "Europe/Oslo", "Europe/Copenhagen"]],

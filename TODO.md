@@ -1,4 +1,5 @@
-- [ ] Drag timezones to rearrange
-- [ ] Add jump-to functionality
+- [x] Drag timezones to rearrange
+- [x] Add jump-to functionality
 - [x] Fix search (spaces don't quite work)
 - [x] Add place names so TZs become easier to find
+- [ ] Floating "now" button to reset?
